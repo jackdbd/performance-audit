@@ -1,0 +1,39 @@
+{
+  "name": "performance-audit",
+  "version": "0.1.0",
+  "description": "",
+  "author": {
+    "name": "Giacomo Debidda",
+    "email": "giacomo@giacomodebidda.com",
+    "url": "https://www.giacomodebidda.com/"
+  },
+  "private": true,
+  "license": "MIT",
+  "keywords": [
+    "apps-script",
+    "webperf",
+    "webpagetest"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "clasp:deployments": "clasp deployments",
+    "clasp:open": "clasp open",
+    "clasp:push": "clasp push",
+    "clasp:status": "clasp status",
+    "clasp:versions": "clasp versions",
+    "clean": "rm -rf dist",
+    "coverage": "vitest run --coverage",
+    "deploy": "run-s clean build clasp:push",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.64",
+    "@vitest/coverage-v8": "^0.32.0",
+    "@vitest/ui": "^0.32.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.8.8",
+    "vitest": "^0.32.0"
+  }
+}

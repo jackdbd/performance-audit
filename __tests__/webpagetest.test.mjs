@@ -1,0 +1,125 @@
+import { afterAll, assert, beforeAll, describe, expect, it, vi } from 'vitest'
+import {
+  GET_WEBPAGETEST_API_KEY,
+  GET_WEBPAGETEST_LOCATIONS,
+  QUERY_STRING
+} from '../src/webpagetest'
+import {
+  EC2_AP_NORTHEAST_3,
+  EC2_EU_SOUTH_1,
+  London_EC2,
+  PropertiesService,
+  UrlFetchApp
+} from './stubs.mjs'
+
+describe('QUERY_STRING', () => {
+  it('is sorted alphabetically', () => {
+    const url = 'https://example.com/'
+    const k = 'my-WPT-API-key'
+
+    const cookie_key = 'TC_PRIVACY'
+    const cookie_value =
+      '0%40022%7C156%7C327%408%2C9%2C10%407%401686205890552%2C1686205890552%2C1701757890552%40'
+    const cookie = `${cookie_key}=${cookie_value}`
+
+    // const decoded = decodeURIComponent(cookie_value)
+
+    const script = [`setCookie %ORIGIN% ${cookie}`, 'navigate %URL%'].join('\n')
+    const whitespace = '%20'
+    const newline = '0A'
+    const equal_sign = '3D'
+    const percent = '%25'
+    const expected_script = `setCookie${whitespace}${percent}ORIGIN${percent}${whitespace}${cookie_key}%${equal_sign}0%2540022%257C156%257C327%25408%252C9%252C10%25407%25401686205890552%252C1686205890552%252C1701757890552%2540%${newline}navigate${whitespace}${percent}URL${percent}`
+
+    const params = [
+      {
+        key: 'url',
+        value: url
+      },
+      {
+        key: 'k',
+        value: k
+      },
+      {
+        key: 'label',
+        value: 'some-label'
+      },
+      {
+        key: 'location',
+        value: 'Dulles:Chrome.Cable'
+      },
+      {
+        key: 'f',
+        value: 'json'
+      },
+      {
+        key: 'fvonly',
+        value: 1
+      },
+      {
+        key: 'runs',
+        value: 1
+      },
+      {
+        key: 'script',
+        value: script
+      }
+    ]
+
+    const expected = `f=json&fvonly=1&k=my-WPT-API-key&label=some-label&location=Dulles%3AChrome.Cable&runs=1&script=${expected_script}&url=https%3A%2F%2Fexample.com%2F`
+
+    assert.equal(QUERY_STRING(params), expected)
+  })
+})
+
+describe('GET_WEBPAGETEST_API_KEY', () => {
+  beforeAll(() => {
+    vi.stubGlobal('PropertiesService', PropertiesService)
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns the expected value for the property', () => {
+    const expected =
+      'the value of the script property WEBPAGETEST_API_KEY is xyz'
+
+    assert.equal(GET_WEBPAGETEST_API_KEY(), expected)
+  })
+})
+
+describe('GET_WEBPAGETEST_LOCATIONS', () => {
+  let expected_locations
+  beforeAll(async () => {
+    vi.stubGlobal('UrlFetchApp', UrlFetchApp)
+
+    const res = await fetch(
+      'https://www.webpagetest.org/getLocations.php?f=json'
+    )
+    const { data } = await res.json()
+    expected_locations = data
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns the expected locations', () => {
+    // const locations = GET_WEBPAGETEST_LOCATIONS()
+
+    // const subset = {
+    //   'ec2-ap-northeast-3': EC2_AP_NORTHEAST_3,
+    //   'ec2-eu-south-1': EC2_EU_SOUTH_1,
+    //   London_EC2
+    // }
+
+    assert.containsAllKeys(expected_locations, [
+      'ec2-ap-northeast-3',
+      'ec2-eu-south-1',
+      'London_EC2'
+    ])
+
+    // assert.containSubset(locations, subset)
+  })
+})

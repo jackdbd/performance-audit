@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://unpkg.com/mvp.css@1.12/mvp.css">
+    <?!= includeHTML('sidebar-css.html'); ?>
+  </head>
+
+  <body>
+    <p>The answer is <?= answer ?>.</p>
+
+    <!-- https://developers.google.com/apps-script/guides/html/reference/host#close() -->
+    <button onclick="google.script.host.close()">Close sidebar</button>
+
+    <form name="Audit" method="POST" action="https://formspree.io/f/mrgdevqb">
+      <!-- <div>
+        <label for="name">Name (optional)</label>
+        <input autocomplete="name" id="name" name="name" placeholder="John Smith" title="Please enter your name">
+      </div> -->
+
+      <!-- <div>
+        <label for="email">Email</label>
+        <input autocomplete="email" id="email" name="email" pattern="^([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x22([^\x0d\x22\x5c\x80-\xff]|\x5c[\x00-\x7f])*\x22))*\x40([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d)(\x2e([^\x00-\x20\x22\x28\x29\x2c\x2e\x3a-\x3c\x3e\x40\x5b-\x5d\x7f-\xff]+|\x5b([^\x0d\x5b-\x5d\x80-\xff]|\x5c[\x00-\x7f])*\x5d))*(\.\w{2,})+$" placeholder="john.smith@example.com" required="" title="The domain portion of the email address is invalid (the portion after the @)." type="email">
+      </div> -->
+
+      <!-- <div>
+        <label for="message">Message</label>
+        <textarea name="message" id="message" placeholder="Your message here…" rows="7" required=""></textarea>
+      </div> -->
+
+      <fieldset>
+        <legend><?= wpt_profiles_legend ?></legend>
+        <? for (let i = 0; i < wpt_profiles.length; i++) { ?>
+          <div>
+            <input type="checkbox" id="<?= wpt_profiles[i].id ?>" name="<?= wpt_profiles[i].name ?>" data-row-index="<?= wpt_profiles[i]['row-index'] ?>">
+            <label for="<?= wpt_profiles[i].id ?>"><?= wpt_profiles[i].name ?></label>
+          </div>
+        <? } ?>
+      </fieldset>
+
+      <fieldset>
+        <legend><?= wpt_cookies_legend ?></legend>
+        <? for (let i = 0; i < wpt_cookies.length; i++) { ?>
+          <div>
+            <input type="checkbox" id="<?= wpt_cookies[i].id ?>" name="<?= wpt_cookies[i].name ?>" data-row-index="<?= wpt_cookies[i]['row-index'] ?>">
+            <label for="<?= wpt_cookies[i].id ?>"><?= wpt_cookies[i].name ?></label>
+          </div>
+        <? } ?>
+      </fieldset>
+
+      <button name="submit" type="submit">Submit tests to WPT</button>
+    </form>
+
+
+    <ol class="things">
+      <? for (var i = 0; i < things.length; i++) { ?>
+          <li><b><?= things[i] ?></b></li>
+      <? } ?>
+    </ol>
+
+    <?!= includeHTML('sidebar-js.html'); ?>
+  </body>
+</html>

@@ -1,0 +1,85 @@
+<script>
+const SELECTOR = {
+  FORM: 'form[name="Audit"]'
+}
+
+const form_elem = document.querySelector(SELECTOR.FORM)
+
+if (!form_elem) {
+  alert(`Selector ${SELECTOR.FORM} found nothing on this page`)
+}
+
+function onGotCookies(value) {
+  console.log(`SUCCESS got cookies`, value)
+  // alert(JSON.stringify(value, null, 2))
+}
+
+function onGotProfiles(value) {
+  console.log(`SUCCESS got profiles`, value)
+  // alert(JSON.stringify(value, null, 2))
+}
+
+function onFailure(error) {
+  console.log("=== ERROR ===", error)
+}
+
+form_elem.addEventListener("submit", async (ev) => {
+  ev.preventDefault()
+
+  const method = ev.target.method
+
+  // instantiating a FormData object causes the formdata event to fire
+  const formData = new FormData(form_elem)
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/:checked
+  const checked = [...document.querySelectorAll('input:checked')]
+
+  const checkboxes_profile = checked.filter(el => el.id.startsWith('wpt-profile'))
+  const checkboxes_cookies = checked.filter(el => el.id.startsWith('wpt-cookie'))
+
+  const profiles = checkboxes_profile.map(el => {
+    return parseInt(el.dataset.rowIndex, 10)
+  })
+
+  const cookies = checkboxes_cookies.map(el => {
+    return parseInt(el.dataset.rowIndex, 10)
+  })
+
+  // these fields were modified by the formdata event
+  // const email = formData.get("email")
+
+  // const message = JSON.stringify({
+  //   message: `WebPageTest will test all combinations of these profiles and cookies`,
+  //   cookies,
+  //   profiles
+  // }, null, 2)
+
+  // alert(message)
+  // console.log(message)
+
+  // const options = {
+  //   method,
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({ name, email, message })
+  // }
+
+  // console.log(`${method.toUpperCase()} to ${ev.target.action}`, options)
+  // const response = await fetch(ev.target.action, options)
+  // const json_data = await response.json();
+
+  // https://developers.google.com/apps-script/guides/html/communication#index.html
+  google.script.run.withFailureHandler(onFailure).withSuccessHandler(onGotCookies).getCookies(cookies)
+  google.script.run.withFailureHandler(onFailure).withSuccessHandler(onGotProfiles).getWebPageTestProfiles(profiles)
+  // console.log("=== GET_COOKIES_CELLS result ===", result)
+})
+
+// form_elem.addEventListener("formdata", (ev) => {
+//   const formData = ev.formData
+//   // formdata gets modified by the formdata event
+//   formData.set("name", formData.get("name").toLowerCase())
+//   formData.set("email", formData.get("email").toLowerCase())
+//   formData.set("message", formData.get("message"))
+// })
+</script>
