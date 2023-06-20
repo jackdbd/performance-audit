@@ -1,6 +1,3 @@
-import { cookiesFromMatrix } from './cookie'
-import { GET_COOKIES_CELLS, GET_WPT_RUNTEST_CELLS } from './spreadsheet'
-import { runtestParamsFromMatrix } from './utils'
 import type { Param } from './utils'
 
 /**
@@ -33,28 +30,45 @@ export const GET_WEBPAGETEST_API_KEY = () => {
   )
 }
 
-const _LOG_WPT_API_KEY = () => {
-  const s = GET_WEBPAGETEST_API_KEY()
-  Logger.log(s)
-}
-
 /**
- * Retrieves all test locations.
+ * Retrieves all available test locations.
  *
  * @return {Object} All locations available in the WebPageTest public instance.
- * @see {@link https://developers.google.com/apps-script/reference/url-fetch/url-fetch-app}
+ * @see {@link https://docs.webpagetest.org/api/reference/#retrieving-available-locations WebPageTest available locations}
  * @customFunction
  */
 export const GET_WEBPAGETEST_LOCATIONS = () => {
   const url = 'https://www.webpagetest.org/getLocations.php?f=json'
-
-  const options = {
-    method: 'get' as 'get'
-  }
-
-  const response = UrlFetchApp.fetch(url, options)
+  const response = UrlFetchApp.fetch(url)
   const result = JSON.parse(response.getContentText())
-  // return result.data
+  return JSON.stringify(result.data, null, 2)
+}
+
+/**
+ * Retrieves the remaining test balance.
+ *
+ * @return {Object} The remaining WebPageTest test balance.
+ * @see {@link https://docs.webpagetest.org/api/reference/#checking-remaining-test-balance WebPageTest test balance}
+ * @customFunction
+ */
+export const GET_WEBPAGETEST_TEST_BALANCE = () => {
+  const k = GET_WEBPAGETEST_API_KEY()
+  const url = `https://www.webpagetest.org/testBalance.php?f=json&k=${k}`
+  const response = UrlFetchApp.fetch(url)
+  const result = JSON.parse(response.getContentText())
+  return result.data.remaining
+}
+
+/**
+ * Retrieves all available testers.
+ *
+ * @return {Object} All testers available in the WebPageTest public instance.
+ * @customFunction
+ */
+export const GET_WEBPAGETEST_TESTERS = () => {
+  const url = 'https://www.webpagetest.org/getTesters.php?f=json'
+  const response = UrlFetchApp.fetch(url)
+  const result = JSON.parse(response.getContentText())
   return JSON.stringify(result.data, null, 2)
 }
 
@@ -63,43 +77,37 @@ interface Datum {
   cookies: { key: string; value: string }[]
 }
 
-export const wptScriptsFromCookies = (arr: Datum[]) => {
-  const scripts = arr.reduce((acc, cv) => {
-    let lines = []
-    cv.cookies.forEach((c) => {
-      lines.push(`setCookie %ORIGIN% ${c.key}=${c.value}`)
-    })
-    lines.push('navigate %URL%')
+export const wptScriptFromCookies = (
+  cookies: { key: string; value: string }[]
+) => {
+  let lines = []
+  cookies.forEach((c) => {
+    lines.push(`setCookie %ORIGIN% ${c.key}=${c.value}`)
+  })
+  lines.push('navigate %URL%')
+  return lines.join('\n')
+}
 
-    const script = lines.join('\n')
-    return [...acc, script]
-  }, [])
+type Cookies = { key: string; value: string }[]
+type Profile = { key: string; value: string }[]
 
-  return scripts
+interface RunTestConfig {
+  cookies: Cookies
+  profile: Profile
+  url: string
 }
 
 /**
  * Runs a WebPageTest audit using the parameters from Google Sheets.
  *
  * @see {@link https://docs.webpagetest.org/api/reference/#running-a-test Running a Test}
- * @customFunction
  */
-export const RUN_WEBPAGETEST = (url: string) => {
-  const params_cells = GET_WPT_RUNTEST_CELLS()
-  const matrix_params = runtestParamsFromMatrix(params_cells)
-
-  const cookies_cells = GET_COOKIES_CELLS()
-  const arr = cookiesFromMatrix(cookies_cells)
-  const scripts = wptScriptsFromCookies(arr)
-
-  const k = GET_WEBPAGETEST_API_KEY()
-
-  // TODO: N params rows, not just the first one. And N WPT scripts using the
-  // cookies set on this URL
+export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
   const params = [
-    ...matrix_params[0],
-    { key: 'k', value: k },
-    { key: 'script', value: scripts[0] },
+    ...profile,
+    { key: 'f', value: 'json' },
+    { key: 'k', value: GET_WEBPAGETEST_API_KEY() },
+    { key: 'script', value: wptScriptFromCookies(cookies) },
     { key: 'url', value: url }
   ]
 
@@ -107,33 +115,52 @@ export const RUN_WEBPAGETEST = (url: string) => {
 
   const wpt_server = 'https://www.webpagetest.org'
   const endpoint = `${wpt_server}/runtest.php`
-  Logger.log(`run WPT test with query string: ${qs}`)
 
   const options = {
     method: 'post' as 'post',
+    headers: {},
     payload: qs
   }
-
   const response = UrlFetchApp.fetch(endpoint, options)
 
-  // A POST to /runtest.php does not return a JSON, but HTML.
-  const response_headers = response.getHeaders()
+  // const response_headers = response.getHeaders()
+
   // Among the HTTP response headers, we only care about Link, namely where to
   // find the WebPageTest result when it will be ready.
-  let link = response_headers['Link']
-  link = link.replace('<', '')
-  link = link.replace('/>; rel="canonical"', '')
+  // let link = response_headers['Link']
+  // link = link.replace('<', '')
+  // link = link.replace('/>; rel="canonical"', '')
 
-  const message = `WebPageTest result will be available at this link: ${link}`
-  Logger.log(message)
+  // const message = `WebPageTest result will be available at this link: ${link}`
+  // Logger.log(message)
+  // Browser.msgBox('Test submitted to WebPageTest', message, Browser.Buttons.OK)
 
-  // https://developers.google.com/apps-script/reference/base/browser
-  Browser.msgBox('Test submitted to WebPageTest', message, Browser.Buttons.OK)
-
-  return link
+  const result = JSON.parse(response.getContentText())
+  return result.data
 }
 
-const _LOG_RUN_WEBPAGETEST = () => {
-  const url = 'https://www.iltirreno.it/'
-  RUN_WEBPAGETEST(url)
+interface RunTestsConfig {
+  array_of_cookies: Cookies[]
+  profiles: Profile[]
+  url: string
+}
+
+// TODO: when no cookies are set, no test is launched. This can be confusing for
+// a user. Decide what to do, or maybe ask the user what to do in this situation.
+
+export const runtests = ({
+  array_of_cookies,
+  profiles,
+  url
+}: RunTestsConfig) => {
+  let arr = []
+
+  for (const cookies of array_of_cookies) {
+    for (const profile of profiles) {
+      const res = runtest({ cookies, profile, url })
+      arr.push(res)
+    }
+  }
+
+  return arr
 }

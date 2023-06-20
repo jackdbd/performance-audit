@@ -1,80 +1,147 @@
 <script>
+const PREFIX = '[performance audit] '
 const SELECTOR = {
-  FORM: 'form[name="Audit"]'
+  FORM: 'form[name="Audit"]',
+  URL_TO_AUDIT: '#url-to-audit'
 }
 
-const form_elem = document.querySelector(SELECTOR.FORM)
-
-if (!form_elem) {
-  alert(`Selector ${SELECTOR.FORM} found nothing on this page`)
+const SHEET_NAME = {
+  COOKIES: 'cookies',
+  WPT_INFO: 'WPT info',
+  WPT_RUNTEST_PARAMS: 'WPT /runtest params'
 }
 
-function onGotCookies(value) {
-  console.log(`SUCCESS got cookies`, value)
-  // alert(JSON.stringify(value, null, 2))
+function onError(error) {
+  const message = error.message || "got an error with no message"
+  console.error("=== ERROR ===", error)
+  alert(`ERROR: ${message}`)
 }
 
-function onGotProfiles(value) {
-  console.log(`SUCCESS got profiles`, value)
-  // alert(JSON.stringify(value, null, 2))
+const useState = () => {
+  let __state = {
+    cookies: [],
+    cookies_for_wpt_runtest: [],
+    profiles_for_wpt_runtest: [],
+    url: '',
+  }
+  return {
+    getState: () => {
+      console.group(`${PREFIX} getState`)
+      console.table({ state: __state })
+      console.groupEnd()
+      return __state
+    },
+    setState: (chunk) => {
+      const old = __state
+      // https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
+      __state = structuredClone({...old, ...chunk})
+      console.group(`${PREFIX} setState`)
+      console.table({ old, chunk, new: __state })
+      console.groupEnd()
+    }
+  }
 }
 
-function onFailure(error) {
-  console.log("=== ERROR ===", error)
+function getUrlToAudit() {
+  const input = document.querySelector(SELECTOR.URL_TO_AUDIT)
+  if (!input) {
+    throw new Error(`selector ${SELECTOR.URL_TO_AUDIT} found nothing on the page`)
+  }
+  return input.value
 }
 
-form_elem.addEventListener("submit", async (ev) => {
-  ev.preventDefault()
+function makeOnGotAllCookies({ setState }) {
+  return function onGotAllCookies(arr) {
+    console.log(`${PREFIX}extracted ${arr.length} cookies from spreadsheet tab ${SHEET_NAME.COOKIES}`)
+    setState({ cookies: arr })
+  }
+}
 
-  const method = ev.target.method
+function makeOnGotProfiles({ getState, setState }) {
+  return function onGotProfiles(arr) {
+    console.log(`${PREFIX}extracted ${arr.length} profiles from spreadsheet tab ${SHEET_NAME.WPT_RUNTEST_PARAMS}`)
 
-  // instantiating a FormData object causes the formdata event to fire
-  const formData = new FormData(form_elem)
+    const { cookies: cookies_with_url, url } = getState()
+    const filtered = cookies_with_url.filter(d => url.includes(d.url))
 
-  // https://developer.mozilla.org/en-US/docs/Web/CSS/:checked
-  const checked = [...document.querySelectorAll('input:checked')]
+    setState({
+      cookies_for_wpt_runtest: filtered.map(d => d.cookies),
+      profiles_for_wpt_runtest: arr
+    })
 
-  const checkboxes_profile = checked.filter(el => el.id.startsWith('wpt-profile'))
-  const checkboxes_cookies = checked.filter(el => el.id.startsWith('wpt-cookie'))
+    const params = getState()
+    console.log('call WebPageTest /runtest with these parameters', params)
+    const array_of_cookies = params.cookies_for_wpt_runtest
+    const profiles = params.profiles_for_wpt_runtest
 
-  const profiles = checkboxes_profile.map(el => {
-    return parseInt(el.dataset.rowIndex, 10)
-  })
+    google.script.run
+      .withFailureHandler(onError)
+      .withSuccessHandler((tests) => {
+        const summary = tests.length === 1 ? 'Launched 1 WPT test' : `Launched ${tests.length} WPT tests`
+        const ids = tests.map(t => t.testId)
+        const message = `${summary}. TEST IDs: ${ids.join(', ')}`
+        google.script.run.displayStatusMessage({ message })
+      })
+      .runtests({ url, array_of_cookies, profiles })
+  }
+}
 
-  const cookies = checkboxes_cookies.map(el => {
-    return parseInt(el.dataset.rowIndex, 10)
-  })
+function makeOnFormSubmit({ getState, setState, onGotProfiles }) {
+  //
+  return function onFormSubmit(ev) {
+    console.log(`${PREFIX}form '${SELECTOR.FORM}' submitted`)
 
-  // these fields were modified by the formdata event
-  // const email = formData.get("email")
+    ev.preventDefault()
+    const method = ev.target.method
 
-  // const message = JSON.stringify({
-  //   message: `WebPageTest will test all combinations of these profiles and cookies`,
-  //   cookies,
-  //   profiles
-  // }, null, 2)
+    // instantiating a FormData object causes the `formdata` event to fire
+    // const formData = new FormData(form_elem)
+  
+    setState({ url: getUrlToAudit() })
 
-  // alert(message)
-  // console.log(message)
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/:checked
+    const checked = [...document.querySelectorAll('input:checked')]
+    const checkboxes_profile = checked.filter(el => el.id.startsWith('wpt-profile'))
+    if (checkboxes_profile.length === 0) {
+      alert(`select at least one WebPageTest profile in the '${SHEET_NAME.WPT_RUNTEST_PARAMS}' spreadsheet tab`)
+    }
 
-  // const options = {
-  //   method,
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify({ name, email, message })
-  // }
+    const profiles = checkboxes_profile.map(el => parseInt(el.dataset.rowIndex, 10))
 
-  // console.log(`${method.toUpperCase()} to ${ev.target.action}`, options)
-  // const response = await fetch(ev.target.action, options)
-  // const json_data = await response.json();
+    google.script.run.displayStatusMessage({ message: `Submitting tests to WebPageTest` })
 
-  // https://developers.google.com/apps-script/guides/html/communication#index.html
-  google.script.run.withFailureHandler(onFailure).withSuccessHandler(onGotCookies).getCookies(cookies)
-  google.script.run.withFailureHandler(onFailure).withSuccessHandler(onGotProfiles).getWebPageTestProfiles(profiles)
-  // console.log("=== GET_COOKIES_CELLS result ===", result)
-})
+    google.script.run
+      .withFailureHandler(onError)
+      .withSuccessHandler(onGotProfiles)
+      .getWebPageTestProfiles(profiles)
+  }
+}
 
+window.onload = (ev) => {
+  console.log(`${PREFIX}window.load event fired`)
+
+  const form_elem = document.querySelector(SELECTOR.FORM)
+  if (!form_elem) {
+    alert(`Selector ${SELECTOR.FORM} found nothing on this page`)
+  }
+
+  const { getState, setState } = useState()
+
+  const onGotAllCookies = makeOnGotAllCookies({ setState })
+  const onGotProfiles = makeOnGotProfiles({ getState, setState })
+  const onFormSubmit = makeOnFormSubmit({ getState, setState, onGotProfiles })
+
+  form_elem.addEventListener("submit", onFormSubmit)
+
+  google.script.run
+    .withFailureHandler(onError)
+    .withSuccessHandler(onGotAllCookies)
+    .getAllCookies()
+}
+
+// Required Validation for a group of checkboxes
+// https://html.form.guide/checkbox/html-form-checkbox-required/
+// https://vyspiansky.github.io/2019/07/13/javascript-at-least-one-checkbox-must-be-selected/
 // form_elem.addEventListener("formdata", (ev) => {
 //   const formData = ev.formData
 //   // formdata gets modified by the formdata event

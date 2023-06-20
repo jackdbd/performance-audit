@@ -12,7 +12,7 @@ describe('GET_OPENAI_API_KEY', () => {
   })
 
   it('returns the expected value for the property', () => {
-    const expected = 'the value of the script property OPENAI_API_KEY is xyz'
+    const expected = process.env['OPENAI_API_KEY']
 
     assert.equal(GET_OPENAI_API_KEY(), expected)
   })

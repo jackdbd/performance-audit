@@ -79,7 +79,6 @@ FILE_NAMES.forEach((file_name) => {
           from: `import { addPerformanceAuditMenuToUi } from './menu'`,
           to: ''
         },
-        { from: `import { cookiesFromMatrix } from './cookie'`, to: '' },
         {
           from: `import { GET_COOKIES_CELLS, GET_WPT_RUNTEST_CELLS } from './spreadsheet'`,
           to: ''

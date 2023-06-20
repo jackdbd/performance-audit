@@ -51,9 +51,6 @@ const menuItemOne = () => {
     return { id: `wpt-cookie-${i}`, name: `Row ${i_row}`, 'row-index': i_row }
   })
 
-  template.answer = 42
-  template.things = ['foo', 'bar', 'baz']
-
   template.wpt_profiles_legend = SHEET_NAME.WPT_RUNTEST_PARAMS
   template.wpt_profiles = wpt_profiles
 
@@ -64,7 +61,7 @@ const menuItemOne = () => {
   const html_output = template.evaluate()
 
   // https://developers.google.com/apps-script/reference/base/ui#showSidebar(Object)
-  html_output.setTitle('Performance Audit sidebar')
+  html_output.setTitle('Performance Audit')
   ui.showSidebar(html_output)
 
   // https://developers.google.com/apps-script/reference/base/ui#showModalDialog(Object,String)

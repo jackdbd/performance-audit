@@ -1,4 +1,4 @@
-import { afterAll, assert, beforeAll, describe, it, vi } from 'vitest'
+import { assert, describe, it } from 'vitest'
 import { cookiesFromMatrix, runtestParamsFromMatrix } from '../src/utils'
 
 const HEADERS_COOKIES = [
