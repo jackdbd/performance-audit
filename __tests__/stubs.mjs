@@ -125,6 +125,18 @@ export const PropertiesService = {
 //   getUserProperties
 // }
 
+const getUi = vi.fn(() => {
+  return {
+    alert: () => {},
+    Button: '',
+    ButtonSet: ''
+  }
+})
+
+export const SpreadsheetApp = {
+  getUi
+}
+
 export const London_EC2 = {
   Browsers:
     'Chrome,Chrome Beta,Chrome Canary,Firefox,Firefox Nightly,Firefox ESR,Brave,Edge',

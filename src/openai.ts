@@ -3,7 +3,6 @@
  *
  * @return {string} Your OpenAI API key.
  * @see {@link https://platform.openai.com/account/api-keys}
- * @customFunction
  */
 export const GET_OPENAI_API_KEY = () => {
   return PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY')

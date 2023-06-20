@@ -5,9 +5,8 @@ import type { Param } from './utils'
  *
  * @param {Array.<{key: String, value: string | number | boolean}>} params key/value pairs of URL parameters.
  * @return {string} query string
- * @customFunction
  */
-export const QUERY_STRING = (params: Param[]) => {
+export const queryString = (params: Param[]) => {
   const arr = params.reduce((acc, cv) => {
     return acc.concat(`${cv.key}=${encodeURIComponent(cv.value)}`)
   }, [])
@@ -22,7 +21,6 @@ export const QUERY_STRING = (params: Param[]) => {
  *
  * @return {string} Your WebPageTest API key.
  * @see {@link https://developers.google.com/apps-script/guides/properties Properties Service}
- * @customFunction
  */
 export const GET_WEBPAGETEST_API_KEY = () => {
   return PropertiesService.getScriptProperties().getProperty(
@@ -72,11 +70,6 @@ export const GET_WEBPAGETEST_TESTERS = () => {
   return JSON.stringify(result.data, null, 2)
 }
 
-interface Datum {
-  url: string
-  cookies: { key: string; value: string }[]
-}
-
 export const wptScriptFromCookies = (
   cookies: { key: string; value: string }[]
 ) => {
@@ -111,7 +104,10 @@ export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
     { key: 'url', value: url }
   ]
 
-  const qs = QUERY_STRING(params)
+  // https://developers.google.com/apps-script/reference/base/browser#msgboxprompt
+  // Browser.msgBox(JSON.stringify(params, null, 2))
+
+  const qs = queryString(params)
 
   const wpt_server = 'https://www.webpagetest.org'
   const endpoint = `${wpt_server}/runtest.php`
@@ -122,18 +118,6 @@ export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
     payload: qs
   }
   const response = UrlFetchApp.fetch(endpoint, options)
-
-  // const response_headers = response.getHeaders()
-
-  // Among the HTTP response headers, we only care about Link, namely where to
-  // find the WebPageTest result when it will be ready.
-  // let link = response_headers['Link']
-  // link = link.replace('<', '')
-  // link = link.replace('/>; rel="canonical"', '')
-
-  // const message = `WebPageTest result will be available at this link: ${link}`
-  // Logger.log(message)
-  // Browser.msgBox('Test submitted to WebPageTest', message, Browser.Buttons.OK)
 
   const result = JSON.parse(response.getContentText())
   return result.data
@@ -153,14 +137,32 @@ export const runtests = ({
   profiles,
   url
 }: RunTestsConfig) => {
-  let arr = []
+  let batch = []
 
   for (const cookies of array_of_cookies) {
     for (const profile of profiles) {
-      const res = runtest({ cookies, profile, url })
+      batch.push({ cookies, profile, url })
+    }
+  }
+
+  let arr = []
+  const ui = SpreadsheetApp.getUi()
+
+  // https://developers.google.com/apps-script/guides/dialogs#alert_dialogs
+  const result = ui.alert(
+    'Please confirm',
+    `The combination of parameters and cookies will result in ${batch.length} WebPageTest tests. Do you want to launch them?`,
+    ui.ButtonSet.YES_NO
+  )
+
+  if (result == ui.Button.YES) {
+    for (const obj of batch) {
+      const res = runtest(obj)
       arr.push(res)
     }
   }
+  // the user clicked "No" or X in the title bar.
+  // ui.alert('No tests will be launched.')
 
   return arr
 }

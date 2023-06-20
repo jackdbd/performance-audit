@@ -1,10 +1,9 @@
 import { afterAll, assert, beforeAll, describe, expect, it, vi } from 'vitest'
 import {
   GET_WEBPAGETEST_API_KEY,
-  GET_WEBPAGETEST_LOCATIONS,
   GET_WEBPAGETEST_TEST_BALANCE,
   GET_WEBPAGETEST_TESTERS,
-  QUERY_STRING,
+  queryString,
   runtest,
   runtests
 } from '../src/webpagetest'
@@ -18,10 +17,11 @@ import {
   PROFILE_DULLES_CHROME_CABLE,
   PROFILE_LONDON_CHROME_3GFAST,
   PropertiesService,
+  SpreadsheetApp,
   UrlFetchApp
 } from './stubs.mjs'
 
-describe('QUERY_STRING', () => {
+describe('queryString', () => {
   it('is sorted alphabetically', () => {
     const url = 'https://example.com/'
     const k = 'my-WPT-API-key'
@@ -77,7 +77,7 @@ describe('QUERY_STRING', () => {
 
     const expected = `f=json&fvonly=1&k=my-WPT-API-key&label=some-label&location=Dulles%3AChrome.Cable&runs=1&script=${expected_script}&url=https%3A%2F%2Fexample.com%2F`
 
-    assert.equal(QUERY_STRING(params), expected)
+    assert.equal(queryString(params), expected)
   })
 })
 
@@ -202,7 +202,7 @@ describe('runtest', () => {
       { key: 'url', value: url }
     ]
 
-    const qs = QUERY_STRING(params)
+    const qs = queryString(params)
 
     // TODO: this POST does not work
     const options = {
@@ -230,6 +230,7 @@ describe('runtests', () => {
 
   beforeAll(async () => {
     vi.stubGlobal('PropertiesService', PropertiesService)
+    vi.stubGlobal('SpreadsheetApp', SpreadsheetApp)
     vi.stubGlobal('UrlFetchApp', UrlFetchApp)
   })
 

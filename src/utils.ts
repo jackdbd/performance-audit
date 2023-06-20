@@ -8,7 +8,6 @@ export interface Param {
  *
  * @param {Object} config headers and values extracted from Google Sheets.
  * @return {Array} matrix of cookies
- * @customFunction
  */
 export const cookiesFromMatrix = ({
   headers,
@@ -38,7 +37,6 @@ export const cookiesFromMatrix = ({
  *
  * @param {Object} config headers and values extracted from Google Sheets.
  * @return {Array} matrix of parameters
- * @customFunction
  */
 export const runtestParamsFromMatrix = ({
   headers,
