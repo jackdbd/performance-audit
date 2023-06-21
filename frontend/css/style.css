@@ -1,3 +1,21 @@
+legend {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 p {
-  color: green;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.box {
+  padding: var(--box-space, 1em);
+}
+
+/*
+Flow utility
+https://piccalil.li/quick-tip/flow-utility/
+*/
+.flow > * + * {
+  margin-top: var(--flow-space, 1em);
 }

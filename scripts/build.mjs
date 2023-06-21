@@ -61,7 +61,7 @@ fs.readdirSync(root_html).forEach((file_name) => {
   fs.copyFileSync(path.join(root_html, file_name), path.join(outdir, file_name))
 })
 
-let sidebar_js = '<script>\n'
+let sidebar_js = '<script defer>\n'
 const root_js = path.join('frontend', 'js')
 fs.readdirSync(root_js).forEach((file_name) => {
   const file_path = path.join(root_js, file_name)

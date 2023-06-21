@@ -2,28 +2,34 @@
 <html>
   <head>
     <base target="_top">
-    <link rel="stylesheet" href="https://unpkg.com/mvp.css@1.12/mvp.css">
+    <!-- This CSS package applies Google styling; it should always be included. -->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
     <?!= includeHTML('sidebar-css.html'); ?>
   </head>
 
+  <!-- see here for how to style a sidebar -->
+  <!-- https://developers.google.com/apps-script/add-ons/guides/css#sidebars -->
+
   <body>
-    <form name="Audit" method="POST" action="https://formspree.io/f/mrgdevqb">
-      <div>
-        <label for="url-to-audit">URL</label>
+    <form class="box flow" name="Audit" method="POST" action="https://formspree.io/f/mrgdevqb">
+      <fieldset>
+        <legend>URL</legend>
+        <p class="gray">Paste the URL to audit.</p>
         <input id="url-to-audit" name="url" placeholder="https://www.google.com/" required title="The URL to audit" type="url">
-      </div>
+      </fieldset>
 
       <fieldset>
         <legend><?= wpt_profiles_legend ?></legend>
+        <p class="gray">Select all the profiles you want to test. Cookies will be set automatically from the <code>cookies</code> spreadsheet tab.</p>
         <? for (let i = 0; i < wpt_profiles.length; i++) { ?>
           <div>
-            <input type="checkbox" id="<?= wpt_profiles[i].id ?>" name="<?= wpt_profiles[i].name ?>" data-row-index="<?= wpt_profiles[i]['row-index'] ?>">
             <label for="<?= wpt_profiles[i].id ?>"><?= wpt_profiles[i].name ?></label>
+            <input type="checkbox" id="<?= wpt_profiles[i].id ?>" name="<?= wpt_profiles[i].name ?>" data-row-index="<?= wpt_profiles[i]['row-index'] ?>">
           </div>
         <? } ?>
       </fieldset>
 
-      <button name="submit" type="submit">Submit tests to WPT</button>
+      <button class="action" name="submit" type="submit">Submit tests to WPT</button>
     </form>
 
     <?!= includeHTML('sidebar-js.html'); ?>
