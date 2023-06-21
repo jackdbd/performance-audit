@@ -70,10 +70,19 @@ export const GET_WEBPAGETEST_TESTERS = () => {
   return JSON.stringify(result.data, null, 2)
 }
 
-export const wptScriptFromCookies = (
-  cookies: { key: string; value: string }[]
-) => {
+type Cookies = { key: string; value: string }[]
+
+/**
+ * Generates a script for WebPageTest that sets cookies and navigates to a URL.
+ *
+ * @param {Array<{ key: string, value: string }>} cookies - An array of key-value pairs representing the cookies to be set.
+ * @return {string} A script for WebPageTest that sets the cookies and navigates to a URL.
+ *
+ * @see {@link https://docs.webpagetest.org/scripting/ WebPageTest Scripting}
+ */
+export const wptScriptFromCookies = (cookies: Cookies) => {
   let lines = []
+  lines.push('addHeader %TEST_ID%')
   cookies.forEach((c) => {
     lines.push(`setCookie %ORIGIN% ${c.key}=${c.value}`)
   })
@@ -81,7 +90,6 @@ export const wptScriptFromCookies = (
   return lines.join('\n')
 }
 
-type Cookies = { key: string; value: string }[]
 type Profile = { key: string; value: string }[]
 
 interface RunTestConfig {
@@ -129,19 +137,29 @@ interface RunTestsConfig {
   url: string
 }
 
-// TODO: when no cookies are set, no test is launched. This can be confusing for
-// a user. Decide what to do, or maybe ask the user what to do in this situation.
-
+/**
+ * Runs WebPageTest tests for a given set of cookies and profiles.
+ *
+ * @param {RunTestsConfig} array_of_cookies - an array of cookie strings to use for each test
+ * @param {Array<Object>} profiles - an array of objects containing the profile parameters for each test
+ * @param {string} url - the URL to test
+ * @return {Array<Object>} An array of test results
+ */
 export const runtests = ({
   array_of_cookies,
   profiles,
   url
 }: RunTestsConfig) => {
   let batch = []
-
-  for (const cookies of array_of_cookies) {
+  if (array_of_cookies.length === 0) {
     for (const profile of profiles) {
-      batch.push({ cookies, profile, url })
+      batch.push({ cookies: [], profile, url })
+    }
+  } else {
+    for (const cookies of array_of_cookies) {
+      for (const profile of profiles) {
+        batch.push({ cookies, profile, url })
+      }
     }
   }
 
