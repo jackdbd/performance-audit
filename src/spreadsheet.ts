@@ -7,7 +7,7 @@ export interface DisplayConfig {
   timeOutSeconds: number
 }
 
-export const displayStatusMessage = ({
+export const displayToast = ({
   message,
   title = 'Status',
   timeOutSeconds = 5
@@ -20,9 +20,6 @@ export const headersAndRows = (name: string) => {
   const spreadsheet = SpreadsheetApp.getActive()
   const sheet = spreadsheet.getSheetByName(name)
 
-  const message = `Extracting headers and values from sheet '${name}'`
-  Logger.log(message)
-
   // In Google Sheets, row/column indexes start at 1
   // -1 because the first row is for the headers
   const num_rows = sheet.getLastRow() - 1
@@ -31,14 +28,27 @@ export const headersAndRows = (name: string) => {
   const headers = sheet.getRange(1, 1, 1, num_columns).getValues()[0]
   const range = sheet.getRange(2, 1, num_rows, num_columns)
 
+  const message = `Extracted headers and values from sheet '${name}'`
+  Logger.log(message)
+
   return { headers, rows: range.getValues() }
 }
 
+/**
+ * Extracts all cookies profiles from the spreadsheet.
+ *
+ * @customFunction
+ */
 export const getAllCookies = () => {
   const { headers, rows } = headersAndRows(SHEET_NAME.COOKIES)
   return cookiesFromMatrix({ headers, matrix: rows })
 }
 
+/**
+ * Extracts all WebPageTest profiles from the spreadsheet.
+ *
+ * @customFunction
+ */
 export const getWebPageTestProfiles = (google_sheets_row_indexes: number[]) => {
   const { headers, rows } = headersAndRows(SHEET_NAME.WPT_RUNTEST_PARAMS)
 

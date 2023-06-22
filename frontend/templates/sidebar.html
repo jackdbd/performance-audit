@@ -3,6 +3,7 @@
   <head>
     <base target="_top">
     <!-- This CSS package applies Google styling; it should always be included. -->
+    <!-- https://developers.google.com/apps-script/add-ons/guides/css -->
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
     <?!= includeHTML('sidebar-css.html'); ?>
   </head>
@@ -21,12 +22,20 @@
       <fieldset>
         <legend><?= wpt_profiles_legend ?></legend>
         <p class="gray">Select all the profiles you want to test. Cookies will be set automatically from the <code>cookies</code> spreadsheet tab.</p>
-        <? for (let i = 0; i < wpt_profiles.length; i++) { ?>
-          <div>
+        <ul class="cluster" data-align="start">
+          <? for (let i = 0; i < wpt_profiles.length; i++) { ?>
+          <li>
             <label for="<?= wpt_profiles[i].id ?>"><?= wpt_profiles[i].name ?></label>
             <input type="checkbox" id="<?= wpt_profiles[i].id ?>" name="<?= wpt_profiles[i].name ?>" data-row-index="<?= wpt_profiles[i]['row-index'] ?>">
-          </div>
-        <? } ?>
+          </li>
+          <? } ?>
+        </ul>
+      </fieldset>
+
+      <fieldset>
+        <legend>injectScript</legend>
+        <p class="gray">JavaScript code to inject in the page.</p>
+        <textarea id="inject-script" name="inject-script" placeholder="console.log('Hello World')" rows="4" cols="50"></textarea>
       </fieldset>
 
       <button class="action" name="submit" type="submit">Submit tests to WPT</button>

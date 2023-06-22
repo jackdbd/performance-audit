@@ -12,7 +12,8 @@ const bundle = ({ file_path }) => {
     /import( type)? {.*} from .*\n/g,
     `// import stripped by ${NAME}\n`
   )
-  s = s.replaceAll(/export const/g, `const`)
+  s = s.replaceAll(/export const/g, 'const')
+  s = s.replaceAll(/export interface/g, 'interface')
   return s
 }
 
@@ -37,13 +38,13 @@ fs.copyFileSync(
 // filePushOrder field in .clasp.json.
 const FILE_NAMES = [
   'constants.ts',
-  'utils.ts',
-  'spreadsheet.ts',
   'cookie.ts',
+  'dialogs.ts',
   'html.ts',
-  'openai.ts',
   'menu.ts',
+  'spreadsheet.ts',
   'triggers.ts',
+  'utils.ts',
   'webpagetest.ts'
 ]
 

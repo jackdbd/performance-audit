@@ -4,7 +4,6 @@
     "utils.ts",
     "spreadsheet.ts",
     "cookie.ts",
-    "openai.ts",
     "menu.ts",
     "triggers.ts"
   ],

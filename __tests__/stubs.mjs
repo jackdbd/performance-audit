@@ -423,6 +423,10 @@ export const testBalanceResponse = {
   }
 }
 
+export const Browser = {
+  msgBox: (str) => {}
+}
+
 export const UrlFetchApp = {
   fetch: (url, options) => {
     if (url.includes('getLocations.php')) {

@@ -21,6 +21,7 @@ export const queryString = (params: Param[]) => {
  *
  * @return {string} Your WebPageTest API key.
  * @see {@link https://developers.google.com/apps-script/guides/properties Properties Service}
+ * @customFunction
  */
 export const GET_WEBPAGETEST_API_KEY = () => {
   return PropertiesService.getScriptProperties().getProperty(
@@ -94,6 +95,7 @@ type Profile = { key: string; value: string }[]
 
 interface RunTestConfig {
   cookies: Cookies
+  inject_script?: string
   profile: Profile
   url: string
 }
@@ -102,8 +104,14 @@ interface RunTestConfig {
  * Runs a WebPageTest audit using the parameters from Google Sheets.
  *
  * @see {@link https://docs.webpagetest.org/api/reference/#running-a-test Running a Test}
+ * @customFunction
  */
-export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
+export const runtest = ({
+  cookies,
+  inject_script,
+  profile,
+  url
+}: RunTestConfig) => {
   const params = [
     ...profile,
     { key: 'f', value: 'json' },
@@ -111,6 +119,9 @@ export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
     { key: 'script', value: wptScriptFromCookies(cookies) },
     { key: 'url', value: url }
   ]
+  if (inject_script) {
+    params.push({ key: 'injectScript', value: inject_script })
+  }
 
   // https://developers.google.com/apps-script/reference/base/browser#msgboxprompt
   // Browser.msgBox(JSON.stringify(params, null, 2))
@@ -133,6 +144,7 @@ export const runtest = ({ cookies, profile, url }: RunTestConfig) => {
 
 interface RunTestsConfig {
   array_of_cookies: Cookies[]
+  inject_script?: string
   profiles: Profile[]
   url: string
 }
@@ -141,24 +153,29 @@ interface RunTestsConfig {
  * Runs WebPageTest tests for a given set of cookies and profiles.
  *
  * @param {RunTestsConfig} array_of_cookies - an array of cookie strings to use for each test
+ * @param {(string | undefined)} inject_script - an optional JS script to inject into the page
  * @param {Array<Object>} profiles - an array of objects containing the profile parameters for each test
  * @param {string} url - the URL to test
  * @return {Array<Object>} An array of test results
+ * @customFunction
  */
 export const runtests = ({
   array_of_cookies,
+  inject_script,
   profiles,
   url
 }: RunTestsConfig) => {
   let batch = []
   if (array_of_cookies.length === 0) {
     for (const profile of profiles) {
-      batch.push({ cookies: [], profile, url })
+      batch.push({ cookies: [], inject_script, profile, url })
     }
   } else {
     for (const cookies of array_of_cookies) {
+      Logger.log(`set cookies for URL ${url}`)
+      Logger.log(JSON.stringify(cookies, null, 2))
       for (const profile of profiles) {
-        batch.push({ cookies, profile, url })
+        batch.push({ cookies, inject_script, profile, url })
       }
     }
   }

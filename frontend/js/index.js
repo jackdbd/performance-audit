@@ -1,13 +1,22 @@
 const PREFIX = '[performance audit] '
+
 const SELECTOR = {
   FORM: 'form[name="Audit"]',
+  INJECT_SCRIPT: '#inject-script',
   URL_TO_AUDIT: '#url-to-audit'
 }
 
 const SHEET_NAME = {
   COOKIES: 'cookies',
-  WPT_INFO: 'WPT info',
   WPT_RUNTEST_PARAMS: 'WPT /runtest params'
+}
+
+const DEFAULT_INITIAL_STATE = {
+  cookies: [],
+  cookies_for_wpt_runtest: [],
+  inject_script: undefined,
+  profiles_for_wpt_runtest: [],
+  url: undefined
 }
 
 function onError(error) {
@@ -16,13 +25,12 @@ function onError(error) {
   alert(`ERROR: ${message}`)
 }
 
-const useState = () => {
-  let __state = {
-    cookies: [],
-    cookies_for_wpt_runtest: [],
-    profiles_for_wpt_runtest: [],
-    url: ''
-  }
+const useState = (initial_state = DEFAULT_INITIAL_STATE) => {
+  let __state = initial_state
+  console.group(`${PREFIX} initial state`)
+  console.table({ state: initial_state })
+  console.groupEnd()
+
   return {
     getState: () => {
       console.group(`${PREFIX} getState`)
@@ -39,6 +47,16 @@ const useState = () => {
       console.groupEnd()
     }
   }
+}
+
+function getInjectScript() {
+  const textarea = document.querySelector(SELECTOR.INJECT_SCRIPT)
+  if (!textarea) {
+    throw new Error(
+      `selector ${SELECTOR.INJECT_SCRIPT} found nothing on the page`
+    )
+  }
+  return textarea.value
 }
 
 function getUrlToAudit() {
@@ -77,6 +95,7 @@ function makeOnGotProfiles({ getState, setState }) {
     const params = getState()
 
     const array_of_cookies = params.cookies_for_wpt_runtest
+    const inject_script = params.inject_script
     const profiles = params.profiles_for_wpt_runtest
 
     google.script.run
@@ -88,27 +107,42 @@ function makeOnGotProfiles({ getState, setState }) {
             : `Launched ${tests.length} WPT tests`
 
         const arr = [summary]
-        if (tests.length > 0) {
-          const ids = tests.map((t) => t.testId)
-          arr.push(`TEST IDs: ${ids.join(', ')}`)
-        }
-        google.script.run.displayStatusMessage({ message: arr.join('.\n') })
+
+        tests.forEach((test) => {
+          // I have no idea why, but concatenating with backticks and $ breaks
+          // the project. Maybe a bug in Apps Script?
+          arr.push('https://www.webpagetest.org/result/' + test.testId + '/')
+        })
+
+        // we cannot render HTML using the standard alert dialog
+        // TODO: use this to show a custom HTML dialog instead of a basic alert
+        // https://developers.google.com/apps-script/guides/dialogs#custom_dialogs
+        const test_ids = tests.map((t) => t.testId)
+
+        google.script.run
+          .withFailureHandler(onError)
+          .showWebPageTestDialog({ summary, test_ids })
       })
-      .runtests({ url, array_of_cookies, profiles })
+      .runtests({ url, array_of_cookies, inject_script, profiles })
   }
 }
 
-function makeOnFormSubmit({ getState, setState, onGotProfiles }) {
+function makeOnFormSubmit({ setState, onGotProfiles }) {
   return function onFormSubmit(ev) {
-    console.log(`${PREFIX}form '${SELECTOR.FORM}' submitted`)
-
     ev.preventDefault()
-    const method = ev.target.method
+
+    // TODO: briefly show an alert to notify the user? Extracting the WPT
+    // profiles from the spreadsheet implies a call to the backend (i.e. Apps
+    // Script servers), which takes a couple of seconds. Not showing anything to
+    // the user is bad UX. But blocking the execution of the script and wait for
+    // the user's is also bad, IMHO.
+    console.log(`${PREFIX}form '${SELECTOR.FORM}' submitted`)
+    // alert(`form '${SELECTOR.FORM}' submitted`)
 
     // instantiating a FormData object causes the `formdata` event to fire
     // const formData = new FormData(form_elem)
 
-    setState({ url: getUrlToAudit() })
+    setState({ inject_script: getInjectScript(), url: getUrlToAudit() })
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/:checked
     const checked = [...document.querySelectorAll('input:checked')]
@@ -124,10 +158,6 @@ function makeOnFormSubmit({ getState, setState, onGotProfiles }) {
     const profiles = checkboxes_profile.map((el) =>
       parseInt(el.dataset.rowIndex, 10)
     )
-
-    // google.script.run.displayStatusMessage({
-    //   message: `Submitting tests to WebPageTest`
-    // })
 
     google.script.run
       .withFailureHandler(onError)
@@ -164,7 +194,5 @@ window.onload = (ev) => {
 // form_elem.addEventListener("formdata", (ev) => {
 //   const formData = ev.formData
 //   // formdata gets modified by the formdata event
-//   formData.set("name", formData.get("name").toLowerCase())
 //   formData.set("email", formData.get("email").toLowerCase())
-//   formData.set("message", formData.get("message"))
 // })

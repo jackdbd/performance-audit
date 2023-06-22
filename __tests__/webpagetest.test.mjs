@@ -8,17 +8,14 @@ import {
   runtests
 } from '../src/webpagetest'
 import {
-  EC2_AP_NORTHEAST_3,
-  EC2_EU_SOUTH_1,
-  London_EC2,
   COOKIES_ACCEPT_CONSENT_BANNER,
   ARRAY_OF_COOKIES,
   PROFILES,
   PROFILE_DULLES_CHROME_CABLE,
-  PROFILE_LONDON_CHROME_3GFAST,
   PropertiesService,
   SpreadsheetApp,
-  UrlFetchApp
+  UrlFetchApp,
+  Browser
 } from './stubs.mjs'
 
 describe('queryString', () => {
@@ -178,6 +175,7 @@ describe('runtest', () => {
   const url = 'https://example.com/'
 
   beforeAll(async () => {
+    vi.stubGlobal('Browser', Browser)
     vi.stubGlobal('PropertiesService', PropertiesService)
     vi.stubGlobal('UrlFetchApp', UrlFetchApp)
   })
@@ -229,6 +227,7 @@ describe('runtests', () => {
   const url = 'https://example.com/'
 
   beforeAll(async () => {
+    vi.stubGlobal('Browser', Browser)
     vi.stubGlobal('PropertiesService', PropertiesService)
     vi.stubGlobal('SpreadsheetApp', SpreadsheetApp)
     vi.stubGlobal('UrlFetchApp', UrlFetchApp)

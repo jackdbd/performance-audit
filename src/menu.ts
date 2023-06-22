@@ -18,28 +18,19 @@ const menuItemOne = () => {
   template.wpt_profiles = wpt_profiles
 
   // https://developers.google.com/apps-script/guides/html/restrictions#restrictions_in_iframe_mode
-  const html_output = template.evaluate()
-
-  html_output.setTitle(MENU.ITEM_ONE_CAPTION)
-  html_output.setWidth(250)
-  html_output.setHeight(300)
+  const html_output = template
+    .evaluate()
+    .setTitle(MENU.ITEM_ONE_CAPTION)
+    .setWidth(250)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 
   ui.showSidebar(html_output)
 }
-
-// const menuItemTwo = () => {
-//   const sheet = SpreadsheetApp.getActiveSpreadsheet()
-
-//   // https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet#toastmsg,-title
-//   sheet.toast('Task menu 2 started', 'Status', 5)
-// }
 
 export const addCustomMenuToUi = () => {
   const ui = SpreadsheetApp.getUi()
 
   ui.createMenu(MENU.TITLE)
     .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemOne')
-    // .addSeparator()
-    // .addSubMenu(ui.createMenu('Sub-menu').addItem('Toast demo', 'menuItemTwo'))
     .addToUi()
 }
