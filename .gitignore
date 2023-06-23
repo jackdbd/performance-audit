@@ -10,6 +10,9 @@ dist/
 # dependencies
 node_modules/
 
+# OAuth credentials for clasp
+.clasprc.json
+
 # environment variables
 .envrc
 
