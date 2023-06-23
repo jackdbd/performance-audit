@@ -48,7 +48,7 @@ ul.cluster {
   list-style: none;
 }
 
-#inject-script {
+#inject-script,#wpt-script {
   min-height: 8em;
   width: 100%;
 }

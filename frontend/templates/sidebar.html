@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- This HTML is rendered in an iframe. If there are links in this iframe,
+    we want the default target to be the top browsing context, not the iframe.
+    https://electrictoolbox.com/base-target-not-javascript/ -->
     <base target="_top">
+
     <!-- This CSS package applies Google styling; it should always be included. -->
     <!-- https://developers.google.com/apps-script/add-ons/guides/css -->
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
@@ -12,7 +16,7 @@
   <!-- https://developers.google.com/apps-script/add-ons/guides/css#sidebars -->
 
   <body>
-    <form class="box flow" name="Audit" method="POST" action="https://formspree.io/f/mrgdevqb">
+    <form class="box flow" name="Audit" method="POST" action="">
       <fieldset>
         <legend>URL</legend>
         <p class="gray">Paste the URL to audit.</p>
@@ -33,9 +37,15 @@
       </fieldset>
 
       <fieldset>
-        <legend>injectScript</legend>
-        <p class="gray">JavaScript code to inject in the page.</p>
-        <textarea id="inject-script" name="inject-script" placeholder="console.log('Hello World')" rows="4" cols="50"></textarea>
+        <legend>WPT script</legend>
+        <p class="gray">WebPageTest <code>script</code> parameter. See <a href="https://docs.webpagetest.org/scripting/">Scripting</a>.</p>
+        <textarea id="wpt-script" name="wpt-script" rows="4" cols="50">navigate %URL%&#13;&#10;execAndWait document.querySelector('#pt-accept-all').click()</textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>JS script</legend>
+        <p class="gray">JavaScript to run on the page as soon as the document exists.</p>
+        <textarea id="inject-script" name="inject-script" rows="4" cols="50">console.log('Hello World')</textarea>
       </fieldset>
 
       <button class="action" name="submit" type="submit">Submit tests to WPT</button>

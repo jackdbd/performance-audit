@@ -411,7 +411,15 @@ export const runtestResponseGET = {
   }
 }
 
-export const runtestResponsePOST = {
+export const runtestResponsePOSTFailure = {
+  statusCode: 400,
+  statusText:
+    'Invalid Script (make sure there is at least one navigate command and that the commands are tab-delimited).  Please contact us if you need help with your test script.'
+}
+
+export const runtestResponsePOSTSuccess = {
+  statusCode: 200,
+  statusText: 'Ok',
   data: {
     testId: '230620_BiDcED_9DX'
   }
@@ -424,7 +432,11 @@ export const testBalanceResponse = {
 }
 
 export const Browser = {
-  msgBox: (str) => {}
+  msgBox: (_str) => {}
+}
+
+export const Logger = {
+  log: (_str) => {}
 }
 
 export const UrlFetchApp = {
@@ -449,7 +461,7 @@ export const UrlFetchApp = {
       if (options.method === 'post') {
         return {
           getContentText: () => {
-            return JSON.stringify(runtestResponsePOST, null, 2)
+            return JSON.stringify(runtestResponsePOSTSuccess, null, 2)
           },
           getHeaders: () => {
             // TODO: see which HTTP headers are returned by the WebPageTest /runtest API endpoint

@@ -73,22 +73,27 @@ export const GET_WEBPAGETEST_TESTERS = () => {
 
 type Cookies = { key: string; value: string }[]
 
+interface WptScriptConfig {
+  header?: string
+  body?: string
+  footer?: string
+}
+
 /**
- * Generates a script for WebPageTest that sets cookies and navigates to a URL.
+ * Generates a script for WebPageTest.
  *
- * @param {Array<{ key: string, value: string }>} cookies - An array of key-value pairs representing the cookies to be set.
+ * @param {Object} config A configuration object.
  * @return {string} A script for WebPageTest that sets the cookies and navigates to a URL.
  *
  * @see {@link https://docs.webpagetest.org/scripting/ WebPageTest Scripting}
+ * @see {@link https://simonhearne.com/2020/testing-behind-consent/ Measuring Performance behind consent popups}
  */
-export const wptScriptFromCookies = (cookies: Cookies) => {
-  let lines = []
-  lines.push('addHeader %TEST_ID%')
-  cookies.forEach((c) => {
-    lines.push(`setCookie %ORIGIN% ${c.key}=${c.value}`)
-  })
-  lines.push('navigate %URL%')
-  return lines.join('\n')
+export const wptScript = (config: WptScriptConfig) => {
+  const header = config.header || ''
+  const body = config.body || ''
+  const footer = config.footer || ''
+
+  return [header, body, footer].join('\n')
 }
 
 type Profile = { key: string; value: string }[]
@@ -98,6 +103,7 @@ interface RunTestConfig {
   inject_script?: string
   profile: Profile
   url: string
+  wpt_script?: string
 }
 
 /**
@@ -110,21 +116,45 @@ export const runtest = ({
   cookies,
   inject_script,
   profile,
-  url
+  url,
+  wpt_script
 }: RunTestConfig) => {
+  const script = wpt_script
+
+  const payload = JSON.stringify(
+    { ...profile, inject_script, script, url },
+    null,
+    2
+  )
+  // This logger seems not to show anything but `message`.
+  Logger.log({
+    ...profile,
+    message: `WPT runtest parameters (see payload): ${payload}`,
+    inject_script,
+    script,
+    url
+  })
+
   const params = [
     ...profile,
     { key: 'f', value: 'json' },
     { key: 'k', value: GET_WEBPAGETEST_API_KEY() },
-    { key: 'script', value: wptScriptFromCookies(cookies) },
     { key: 'url', value: url }
   ]
   if (inject_script) {
     params.push({ key: 'injectScript', value: inject_script })
   }
+  if (script) {
+    params.push({ key: 'script', value: script })
+  }
 
-  // https://developers.google.com/apps-script/reference/base/browser#msgboxprompt
-  // Browser.msgBox(JSON.stringify(params, null, 2))
+  // https://developers.google.com/apps-script/reference/base/browser#msgboxtitle,-prompt,-buttons
+  // Browser.msgBox('WPT script', script, Browser.Buttons.OK)
+  // Browser.msgBox(
+  //   'WPT /runtest parameters',
+  //   JSON.stringify(params, null, 2),
+  //   Browser.Buttons.OK
+  // )
 
   const qs = queryString(params)
 
@@ -139,13 +169,22 @@ export const runtest = ({
   const response = UrlFetchApp.fetch(endpoint, options)
 
   const result = JSON.parse(response.getContentText())
-  return result.data
+
+  if (result.statusCode === 200) {
+    return { value: result.data }
+  } else {
+    const text = result.statusText || 'Unknown error'
+    const code = result.statusCode || 'Unknown status code'
+    Logger.log(`[${code}]: ${text}`)
+    return { error: new Error(`[${code}]: ${text}`) }
+  }
 }
 
 interface RunTestsConfig {
   array_of_cookies: Cookies[]
   inject_script?: string
   profiles: Profile[]
+  script_lines: string[]
   url: string
 }
 
@@ -156,6 +195,7 @@ interface RunTestsConfig {
  * @param {(string | undefined)} inject_script - an optional JS script to inject into the page
  * @param {Array<Object>} profiles - an array of objects containing the profile parameters for each test
  * @param {string} url - the URL to test
+ * @param {(string | undefined)} wpt_script - an optional WPT script
  * @return {Array<Object>} An array of test results
  * @customFunction
  */
@@ -163,24 +203,46 @@ export const runtests = ({
   array_of_cookies,
   inject_script,
   profiles,
+  script_lines,
   url
 }: RunTestsConfig) => {
+  const wpt_script = script_lines.join('\n')
+
+  // const id_consent_button = 'pt-accept-all'
+  // TODO: I tried to take the WPT script from the frontend, but SOMETIMES it
+  // doesn't work. It SEEMS that using %URL% makes the navigation fail.
+  // const wpt_script = [
+  //   `addHeader %TEST_ID%`,
+  //   `setEventName navigate_and_wait_for_consent_banner`,
+  //   `navigate ${url}`,
+  //   `waitFor document.getElementById('${id_consent_button}')`,
+  //   `setEventName click_accept_cookies`,
+  //   `execAndWait document.querySelector('#${id_consent_button}').click()`
+  // ].join('\n')
+
   let batch = []
   if (array_of_cookies.length === 0) {
     for (const profile of profiles) {
-      batch.push({ cookies: [], inject_script, profile, url })
+      batch.push({ cookies: [], inject_script, profile, url, wpt_script })
     }
   } else {
     for (const cookies of array_of_cookies) {
       Logger.log(`set cookies for URL ${url}`)
       Logger.log(JSON.stringify(cookies, null, 2))
       for (const profile of profiles) {
-        batch.push({ cookies, inject_script, profile, url })
+        batch.push({ cookies, inject_script, profile, url, wpt_script })
       }
     }
   }
 
-  let arr = []
+  const successes = []
+  // We cannot return Error objects to the frontend. We would need to serialize
+  // them, and this might not worth the performance cost. Better simply return
+  // the error messages as strings.
+  // https://stackoverflow.com/questions/18391212/is-it-not-possible-to-stringify-an-error-using-json-stringify
+  // https://betterprogramming.pub/serializing-error-in-javascript-27c3a048dc3b
+  const error_messages = []
+
   const ui = SpreadsheetApp.getUi()
 
   // https://developers.google.com/apps-script/guides/dialogs#alert_dialogs
@@ -192,12 +254,40 @@ export const runtests = ({
 
   if (result == ui.Button.YES) {
     for (const obj of batch) {
+      // I don't know why logs inside runtest do not show up. So I log them here.
+      const payload = JSON.stringify(obj, null, 2)
+      Logger.log({
+        message: `WPT runtest parameters (see payload): ${payload}`
+      })
       const res = runtest(obj)
-      arr.push(res)
+
+      if (res.error) {
+        console.error(
+          `could not launch WPT test for URL ${obj.url}. error: ${res.error.message}`
+        )
+        error_messages.push(res.error.message)
+      }
+      if (res.value) {
+        Logger.log(
+          `launched WPT test for URL ${obj.url}. testId: ${res.value.testId}`
+        )
+        successes.push(res.value)
+      }
     }
   }
+
   // the user clicked "No" or X in the title bar.
   // ui.alert('No tests will be launched.')
 
-  return arr
+  // This function tries to launch N WPT tests. Throwing an exception if even
+  // just one of the test failed to run seems unreasonable. I think it's better
+  // to return a result object containing a recap of all failed/successful
+  // operations.
+  // if (errors.length > 0) {
+  //   const summary = `${errors.length} errors when launching the WPT tests`
+  //   const details = errors.map((e) => e.message)
+  //   throw new Error(`${summary}.\n${details.join('\n')}`)
+  // }
+
+  return { error_messages, successes }
 }

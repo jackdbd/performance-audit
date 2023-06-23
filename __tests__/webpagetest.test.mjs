@@ -5,11 +5,13 @@ import {
   GET_WEBPAGETEST_TESTERS,
   queryString,
   runtest,
-  runtests
+  runtests,
+  wptScript
 } from '../src/webpagetest'
 import {
   COOKIES_ACCEPT_CONSENT_BANNER,
   ARRAY_OF_COOKIES,
+  Logger,
   PROFILES,
   PROFILE_DULLES_CHROME_CABLE,
   PropertiesService,
@@ -176,6 +178,7 @@ describe('runtest', () => {
 
   beforeAll(async () => {
     vi.stubGlobal('Browser', Browser)
+    vi.stubGlobal('Logger', Logger)
     vi.stubGlobal('PropertiesService', PropertiesService)
     vi.stubGlobal('UrlFetchApp', UrlFetchApp)
   })
@@ -217,9 +220,9 @@ describe('runtest', () => {
 
     const expected_test_id = '230620_BiDcED_9DX'
 
-    const { testId } = runtest({ cookies, profile, url })
+    const result = runtest({ cookies, profile, url })
 
-    assert.equal(testId, expected_test_id)
+    assert.equal(result.value.testId, expected_test_id)
   })
 })
 
@@ -228,6 +231,7 @@ describe('runtests', () => {
 
   beforeAll(async () => {
     vi.stubGlobal('Browser', Browser)
+    vi.stubGlobal('Logger', Logger)
     vi.stubGlobal('PropertiesService', PropertiesService)
     vi.stubGlobal('SpreadsheetApp', SpreadsheetApp)
     vi.stubGlobal('UrlFetchApp', UrlFetchApp)
@@ -241,8 +245,43 @@ describe('runtests', () => {
     const array_of_cookies = ARRAY_OF_COOKIES
     const profiles = PROFILES
 
-    const result = runtests({ array_of_cookies, profiles, url })
+    const result = runtests({
+      array_of_cookies,
+      profiles,
+      script_lines: [],
+      url
+    })
 
-    assert.equal(result.length, array_of_cookies.length * profiles.length)
+    assert.equal(result.error_messages.length, 0)
+    assert.equal(
+      result.successes.length,
+      array_of_cookies.length * profiles.length
+    )
+  })
+})
+
+describe('wptScript', () => {
+  it('returns the expected string', () => {
+    const header = [
+      'setEventName add_request_headers',
+      'addHeader %TEST_ID%'
+    ].join('\n')
+
+    const lines = []
+    lines.push('setEventName set_cookies')
+    COOKIES_ACCEPT_CONSENT_BANNER.forEach((c) => {
+      lines.push(`setCookie %ORIGIN% ${c.key}=${c.value}`)
+    })
+    // https://www.lanazione.it/
+    lines.push('setEventName click_consent_banner_and_accept_cookies')
+    lines.push(`execAndWait document.querySelector('#pt-accept-all').click()`)
+    const body = lines.join('\n')
+
+    const footer = ['setEventName load_page', 'navigate %URL%'].join('\n')
+
+    const expected = [header, body, footer].join('\n')
+    const actual = wptScript({ header, body, footer })
+
+    assert.equal(actual, expected)
   })
 })

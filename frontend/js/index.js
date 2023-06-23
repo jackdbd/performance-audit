@@ -3,7 +3,8 @@ const PREFIX = '[performance audit] '
 const SELECTOR = {
   FORM: 'form[name="Audit"]',
   INJECT_SCRIPT: '#inject-script',
-  URL_TO_AUDIT: '#url-to-audit'
+  URL_TO_AUDIT: '#url-to-audit',
+  WPT_SCRIPT: '#wpt-script'
 }
 
 const SHEET_NAME = {
@@ -16,12 +17,13 @@ const DEFAULT_INITIAL_STATE = {
   cookies_for_wpt_runtest: [],
   inject_script: undefined,
   profiles_for_wpt_runtest: [],
+  script_lines: [],
   url: undefined
 }
 
 function onError(error) {
   const message = error.message || 'got an error with no message'
-  console.error('=== ERROR ===', error)
+  console.error(`${PREFIX} error`, error)
   alert(`ERROR: ${message}`)
 }
 
@@ -49,24 +51,12 @@ const useState = (initial_state = DEFAULT_INITIAL_STATE) => {
   }
 }
 
-function getInjectScript() {
-  const textarea = document.querySelector(SELECTOR.INJECT_SCRIPT)
-  if (!textarea) {
-    throw new Error(
-      `selector ${SELECTOR.INJECT_SCRIPT} found nothing on the page`
-    )
+function getValueFromSelector(selector) {
+  const el = document.querySelector(selector)
+  if (!el) {
+    throw new Error(`selector ${selector} found no DOM element on the page`)
   }
-  return textarea.value
-}
-
-function getUrlToAudit() {
-  const input = document.querySelector(SELECTOR.URL_TO_AUDIT)
-  if (!input) {
-    throw new Error(
-      `selector ${SELECTOR.URL_TO_AUDIT} found nothing on the page`
-    )
-  }
-  return input.value
+  return el.value
 }
 
 function makeOnGotAllCookies({ setState }) {
@@ -97,33 +87,36 @@ function makeOnGotProfiles({ getState, setState }) {
     const array_of_cookies = params.cookies_for_wpt_runtest
     const inject_script = params.inject_script
     const profiles = params.profiles_for_wpt_runtest
+    const script_lines = params.script_lines
 
     google.script.run
       .withFailureHandler(onError)
-      .withSuccessHandler((tests) => {
+      .withSuccessHandler((result) => {
+        const { error_messages, successes } = result
+
+        if (error_messages.length > 0) {
+          onError(new Error(error_messages.join('\n')))
+          return
+        }
+
         const summary =
-          tests.length === 1
+          successes.length === 1
             ? 'Launched 1 WPT test'
-            : `Launched ${tests.length} WPT tests`
+            : `Launched ${successes.length} WPT tests`
 
-        const arr = [summary]
-
-        tests.forEach((test) => {
-          // I have no idea why, but concatenating with backticks and $ breaks
-          // the project. Maybe a bug in Apps Script?
-          arr.push('https://www.webpagetest.org/result/' + test.testId + '/')
-        })
-
-        // we cannot render HTML using the standard alert dialog
-        // TODO: use this to show a custom HTML dialog instead of a basic alert
-        // https://developers.google.com/apps-script/guides/dialogs#custom_dialogs
-        const test_ids = tests.map((t) => t.testId)
+        const test_ids = successes.map((d) => d.testId)
 
         google.script.run
           .withFailureHandler(onError)
           .showWebPageTestDialog({ summary, test_ids })
       })
-      .runtests({ url, array_of_cookies, inject_script, profiles })
+      .runtests({
+        url,
+        array_of_cookies,
+        inject_script,
+        profiles,
+        script_lines
+      })
   }
 }
 
@@ -137,12 +130,24 @@ function makeOnFormSubmit({ setState, onGotProfiles }) {
     // the user is bad UX. But blocking the execution of the script and wait for
     // the user's is also bad, IMHO.
     console.log(`${PREFIX}form '${SELECTOR.FORM}' submitted`)
-    // alert(`form '${SELECTOR.FORM}' submitted`)
 
     // instantiating a FormData object causes the `formdata` event to fire
     // const formData = new FormData(form_elem)
 
-    setState({ inject_script: getInjectScript(), url: getUrlToAudit() })
+    let script = getValueFromSelector(SELECTOR.WPT_SCRIPT)
+
+    let script_lines = []
+    if (script && script !== '') {
+      script_lines = script.split('\n')
+    }
+
+    console.log('WPT script lines')
+    console.log(script_lines)
+
+    const inject_script = getValueFromSelector(SELECTOR.INJECT_SCRIPT)
+    const url = getValueFromSelector(SELECTOR.URL_TO_AUDIT)
+
+    setState({ inject_script, url, script_lines })
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/:checked
     const checked = [...document.querySelectorAll('input:checked')]
@@ -159,6 +164,13 @@ function makeOnFormSubmit({ setState, onGotProfiles }) {
       parseInt(el.dataset.rowIndex, 10)
     )
 
+    const config_for_url = localStorage.getItem(url)
+    console.log(`${PREFIX} got config for ${url} from localStorage`)
+    console.log(JSON.parse(config_for_url))
+
+    // WIP: store the WPT script used on this URL to retrieve it later
+    localStorage.setItem(url, JSON.stringify({ inject_script, script_lines }))
+
     google.script.run
       .withFailureHandler(onError)
       .withSuccessHandler(onGotProfiles)
@@ -166,7 +178,7 @@ function makeOnFormSubmit({ setState, onGotProfiles }) {
   }
 }
 
-window.onload = (ev) => {
+window.onload = (_ev) => {
   console.log(`${PREFIX}window.load event fired`)
 
   const form_elem = document.querySelector(SELECTOR.FORM)
