@@ -21,6 +21,14 @@ const DEFAULT_INITIAL_STATE = {
   url: undefined
 }
 
+const DEFAULT_CONFIG = {
+  inject_script: `console.log('Hello World!')`,
+  script_lines: [
+    'navigate %URL%',
+    "execAndWait document.querySelector('#accept-cookies').click()"
+  ]
+}
+
 function onError(error) {
   const message = error.message || 'got an error with no message'
   console.error(`${PREFIX} error`, error)
@@ -120,6 +128,62 @@ function makeOnGotProfiles({ getState, setState }) {
   }
 }
 
+function makeOnUrlToAuditBlur({ getState, setState }) {
+  const textarea_inject_script = document.querySelector(SELECTOR.INJECT_SCRIPT)
+  if (!textarea_inject_script) {
+    alert(
+      `Selector ${SELECTOR.INJECT_SCRIPT} found no DOM element on this page`
+    )
+  }
+  const textarea_script = document.querySelector(SELECTOR.WPT_SCRIPT)
+  if (!textarea_script) {
+    alert(`Selector ${SELECTOR.WPT_SCRIPT} found no DOM element on this page`)
+  }
+
+  return function onUrlToAuditBlur(ev) {
+    // we need to get the latest URL that the user has typed in the form, so we
+    // cannot select it outside of this event handler.
+    const url = getValueFromSelector(SELECTOR.URL_TO_AUDIT)
+    if (!url) {
+      return
+    }
+
+    const u = new URL(url)
+    const value_href = localStorage.getItem(u.href)
+    const value_origin = localStorage.getItem(u.origin)
+
+    let config
+    if (value_href) {
+      console.log(
+        `${PREFIX} found configuration matching HREF ${u.href} in localStorage`
+      )
+      config = JSON.parse(value_href)
+    } else if (value_origin) {
+      console.log(
+        `${PREFIX} found configuration matching ORIGIN ${u.origin} in localStorage`
+      )
+      config = JSON.parse(value_origin)
+    } else {
+      console.log(`${PREFIX} found no configuration for ${url} in localStorage`)
+      config = DEFAULT_CONFIG
+    }
+
+    console.log(`${PREFIX} configuration`)
+    console.table(config)
+    console.groupEnd()
+
+    // TODO: it would be nice to highlight the textareas with some CSS (e.g.
+    // for 1-2 seconds), so the user understands these values have changed.
+    if (config.inject_script) {
+      textarea_inject_script.value = config.inject_script
+    }
+
+    if (config.script_lines) {
+      textarea_script.value = config.script_lines.join('\n')
+    }
+  }
+}
+
 function makeOnFormSubmit({ setState, onGotProfiles }) {
   return function onFormSubmit(ev) {
     ev.preventDefault()
@@ -141,9 +205,6 @@ function makeOnFormSubmit({ setState, onGotProfiles }) {
       script_lines = script.split('\n')
     }
 
-    console.log('WPT script lines')
-    console.log(script_lines)
-
     const inject_script = getValueFromSelector(SELECTOR.INJECT_SCRIPT)
     const url = getValueFromSelector(SELECTOR.URL_TO_AUDIT)
 
@@ -164,12 +225,10 @@ function makeOnFormSubmit({ setState, onGotProfiles }) {
       parseInt(el.dataset.rowIndex, 10)
     )
 
-    const config_for_url = localStorage.getItem(url)
-    console.log(`${PREFIX} got config for ${url} from localStorage`)
-    console.log(JSON.parse(config_for_url))
-
-    // WIP: store the WPT script used on this URL to retrieve it later
-    localStorage.setItem(url, JSON.stringify({ inject_script, script_lines }))
+    const u = new URL(url)
+    const str = JSON.stringify({ inject_script, script_lines })
+    localStorage.setItem(u.href, str)
+    localStorage.setItem(u.origin, str)
 
     google.script.run
       .withFailureHandler(onError)
@@ -186,13 +245,25 @@ window.onload = (_ev) => {
     alert(`Selector ${SELECTOR.FORM} found nothing on this page`)
   }
 
+  const input_url_elem = document.querySelector(SELECTOR.URL_TO_AUDIT)
+  if (!input_url_elem) {
+    alert(`Selector ${SELECTOR.URL_TO_AUDIT} found nothing on this page`)
+  }
+
   const { getState, setState } = useState()
 
   const onGotAllCookies = makeOnGotAllCookies({ setState })
   const onGotProfiles = makeOnGotProfiles({ getState, setState })
-  const onFormSubmit = makeOnFormSubmit({ getState, setState, onGotProfiles })
 
-  form_elem.addEventListener('submit', onFormSubmit)
+  input_url_elem.addEventListener(
+    'blur',
+    makeOnUrlToAuditBlur({ getState, setState })
+  )
+
+  form_elem.addEventListener(
+    'submit',
+    makeOnFormSubmit({ getState, setState, onGotProfiles })
+  )
 
   google.script.run
     .withFailureHandler(onError)
