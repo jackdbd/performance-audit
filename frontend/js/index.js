@@ -128,6 +128,12 @@ function makeOnGotProfiles({ getState, setState }) {
   }
 }
 
+function resetDataset(key, elements) {
+  for (const el of elements) {
+    el.dataset[key] = ''
+  }
+}
+
 function makeOnUrlToAuditBlur({ getState, setState }) {
   const textarea_inject_script = document.querySelector(SELECTOR.INJECT_SCRIPT)
   if (!textarea_inject_script) {
@@ -176,11 +182,19 @@ function makeOnUrlToAuditBlur({ getState, setState }) {
     // for 1-2 seconds), so the user understands these values have changed.
     if (config.inject_script) {
       textarea_inject_script.value = config.inject_script
+      // https://medium.com/@DavidKPiano/css-animations-with-finite-state-machines-7d596bb2914a
+      textarea_inject_script.dataset.state = 'just-updated'
     }
 
     if (config.script_lines) {
       textarea_script.value = config.script_lines.join('\n')
+      textarea_script.dataset.state = 'just-updated'
     }
+
+    setTimeout(
+      () => resetDataset('state', [textarea_inject_script, textarea_script]),
+      2000
+    )
   }
 }
 

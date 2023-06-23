@@ -1,3 +1,12 @@
+@keyframes flash {
+  from {
+    background-color: yellow;
+  }
+  to {
+    background-color: white;
+  }
+}
+
 legend {
   padding-top: 0;
   padding-bottom: 0;
@@ -55,4 +64,12 @@ ul.cluster {
 
 #url-to-audit {
   width: 100%;
+}
+
+#inject-script[data-state="just-updated"],
+#wpt-script[data-state="just-updated"] {
+  animation-name: flash;
+  animation-duration: 1500ms;
+  animation-iteration-count: 1;
+  background-color: white;
 }
