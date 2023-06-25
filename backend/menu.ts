@@ -31,5 +31,6 @@ export const addCustomMenuToUi = () => {
   SpreadsheetApp.getUi()
     .createMenu(MENU.TITLE)
     .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemOne')
+    .addItem('Run query on BigQuery CrUX dataset', 'runDemoQuery')
     .addToUi()
 }
