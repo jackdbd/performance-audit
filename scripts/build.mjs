@@ -40,7 +40,6 @@ const FILE_NAMES = [
   'constants.ts',
   'cookie.ts',
   'dialogs.ts',
-  'html.ts',
   'menu.ts',
   'spreadsheet.ts',
   'triggers.ts',

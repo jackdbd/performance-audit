@@ -1,1 +1,13 @@
-{"filePushOrder":["constants.ts","utils.ts","spreadsheet.ts","cookie.ts","menu.ts","triggers.ts"],"rootDir":"dist","scriptId":"1eBRYJmJYqe6Ki224Pr2pTj8SfW0ifCdjishaYufXNz59dEmQcQAu0MwJ","projectId":"prj-kitchen-sink"}
+{
+  "filePushOrder": [
+    "constants.ts",
+    "utils.ts",
+    "spreadsheet.ts",
+    "cookie.ts",
+    "menu.ts",
+    "triggers.ts"
+  ],
+  "rootDir": "dist",
+  "scriptId": "1eBRYJmJYqe6Ki224Pr2pTj8SfW0ifCdjishaYufXNz59dEmQcQAu0MwJ",
+  "projectId": "prj-kitchen-sink"
+}

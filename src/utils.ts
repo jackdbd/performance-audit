@@ -57,3 +57,7 @@ export const runtestParamsFromMatrix = ({
 
   return matrix_params as Param[][]
 }
+
+function includeHTML(filename: string) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent()
+}

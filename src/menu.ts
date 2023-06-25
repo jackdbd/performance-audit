@@ -2,8 +2,6 @@ import { MENU, SHEET_NAME } from './constants'
 import { headersAndRows } from './spreadsheet'
 
 const menuItemOne = () => {
-  const ui = SpreadsheetApp.getUi()
-
   // https://developers.google.com/apps-script/reference/html/html-service.html#createTemplateFromFile(String)
   const template = HtmlService.createTemplateFromFile('sidebar.html')
 
@@ -17,20 +15,21 @@ const menuItemOne = () => {
   template.wpt_profiles_legend = SHEET_NAME.WPT_RUNTEST_PARAMS
   template.wpt_profiles = wpt_profiles
 
+  // Apps Script uses iframes to sandbox custom user interfaces (like this sidebar) for Google Docs, Sheets, and Forms.
   // https://developers.google.com/apps-script/guides/html/restrictions#restrictions_in_iframe_mode
+  // Unfortunately, it is not possible to resize sidebars.
+  // https://developers.google.com/apps-script/guides/html/communication#resizing_dialogs_in_applications
   const html_output = template
     .evaluate()
     .setTitle(MENU.ITEM_ONE_CAPTION)
-    .setWidth(250)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 
-  ui.showSidebar(html_output)
+  SpreadsheetApp.getUi().showSidebar(html_output)
 }
 
 export const addCustomMenuToUi = () => {
-  const ui = SpreadsheetApp.getUi()
-
-  ui.createMenu(MENU.TITLE)
+  SpreadsheetApp.getUi()
+    .createMenu(MENU.TITLE)
     .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemOne')
     .addToUi()
 }
