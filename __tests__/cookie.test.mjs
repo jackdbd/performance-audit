@@ -1,5 +1,5 @@
 import { assert, describe, it } from 'vitest'
-import { DECODE_COOKIE } from '../src/cookie'
+import { DECODE_COOKIE } from '../backend/cookie'
 
 describe('DECODE_COOKIE', () => {
   it('decodes the Iubenda cookie as expected', () => {

@@ -9,7 +9,8 @@
     <!-- This CSS package applies Google styling; it should always be included. -->
     <!-- https://developers.google.com/apps-script/add-ons/guides/css -->
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
-    <?!= includeHTML('sidebar-css.html'); ?>
+    <?!= includeHTML('style.css.html'); ?>
+    <?!= includeHTML('sidebar-wpt.css.html'); ?>
   </head>
 
   <!-- see here for how to style a sidebar -->
@@ -51,6 +52,6 @@
       <button class="action" name="submit" type="submit">Submit tests to WPT</button>
     </form>
 
-    <?!= includeHTML('sidebar-js.html'); ?>
+    <?!= includeHTML('sidebar-wpt.js.html'); ?>
   </body>
 </html>

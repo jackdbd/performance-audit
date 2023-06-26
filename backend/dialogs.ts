@@ -16,7 +16,6 @@ export const showWebPageTestDialog = ({
   test_ids
 }: ShowWebPageTestDialogConfig) => {
   const template = HtmlService.createTemplateFromFile('dialog-wpt-tests.html')
-
   template.summary = summary
   template.test_ids = test_ids
 

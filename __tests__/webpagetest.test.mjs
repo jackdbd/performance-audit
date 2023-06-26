@@ -7,7 +7,7 @@ import {
   runtest,
   runtests,
   wptScript
-} from '../src/webpagetest'
+} from '../backend/webpagetest'
 import {
   COOKIES_ACCEPT_CONSENT_BANNER,
   ARRAY_OF_COOKIES,

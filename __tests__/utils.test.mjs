@@ -1,5 +1,9 @@
 import { assert, describe, it } from 'vitest'
-import { cookiesFromMatrix, runtestParamsFromMatrix } from '../src/utils'
+import {
+  cookiesFromMatrix,
+  getPreviousNMonths,
+  runtestParamsFromMatrix
+} from '../backend/utils'
 
 const HEADERS_COOKIES = [
   'URL',
@@ -76,29 +80,6 @@ const ROWS_PARAMS = [
   ]
 ]
 
-describe('runtestParamsFromMatrix', () => {
-  it('creates a matrix of parameters from Google Sheets headers+rows', () => {
-    ROWS_PARAMS.forEach((row, i) => {
-      assert.equal(
-        row.length,
-        HEADERS_PARAMS.length,
-        `ROWS_PARAMS[${i}] does not match the headers' length`
-      )
-    })
-
-    const matrix_params = runtestParamsFromMatrix({
-      headers: HEADERS_PARAMS,
-      matrix: ROWS_PARAMS
-    })
-
-    assert.equal(matrix_params.length, ROWS_PARAMS.length)
-
-    matrix_params.forEach((params, i) => {
-      assert.isAtMost(params.length, ROWS_PARAMS[i].length)
-    })
-  })
-})
-
 describe('cookiesFromMatrix', () => {
   it('creates a matrix of parameters from Google Sheets headers+rows', () => {
     ROWS_COOKIES.forEach((row, i) => {
@@ -120,6 +101,45 @@ describe('cookiesFromMatrix', () => {
       // -1 because each row in Google Sheets contains also the URL where the
       // cookie should be set
       assert.isAtMost(d.cookies.length, ROWS_COOKIES[i].length - 1)
+    })
+  })
+})
+
+describe('getPreviousNMonths', () => {
+  it('is in the yyyymm format', () => {
+    const arr = getPreviousNMonths(3)
+
+    const this_year = new Date().getFullYear()
+
+    assert.equal(arr.length, 3)
+
+    arr.forEach((yyyymm) => {
+      assert.isAtLeast(parseInt(yyyymm.slice(0, 4)), this_year)
+      assert.equal(yyyymm.length, 6)
+      assert.isTrue(yyyymm[4] === '0' || yyyymm[4] === '1')
+    })
+  })
+})
+
+describe('runtestParamsFromMatrix', () => {
+  it('creates a matrix of parameters from Google Sheets headers+rows', () => {
+    ROWS_PARAMS.forEach((row, i) => {
+      assert.equal(
+        row.length,
+        HEADERS_PARAMS.length,
+        `ROWS_PARAMS[${i}] does not match the headers' length`
+      )
+    })
+
+    const matrix_params = runtestParamsFromMatrix({
+      headers: HEADERS_PARAMS,
+      matrix: ROWS_PARAMS
+    })
+
+    assert.equal(matrix_params.length, ROWS_PARAMS.length)
+
+    matrix_params.forEach((params, i) => {
+      assert.isAtMost(params.length, ROWS_PARAMS[i].length)
     })
   })
 })

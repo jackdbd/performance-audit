@@ -54,20 +54,20 @@ fs.readdirSync(templates_root).forEach((file_name) => {
   )
 })
 
-let sidebar_js = '<script defer>\n'
-const root_js = path.join(frontend_root, 'js')
-fs.readdirSync(root_js).forEach((file_name) => {
-  const file_path = path.join(root_js, file_name)
-  sidebar_js = sidebar_js.concat(fs.readFileSync(file_path).toString())
-})
-sidebar_js = sidebar_js.concat('\n</script>')
-fs.writeFileSync(path.join(outdir, 'sidebar-js.html'), sidebar_js)
+const css_root = path.join(frontend_root, 'css')
+fs.readdirSync(css_root).forEach((file_name) => {
+  const file_path_input = path.join(css_root, file_name)
+  const file_path_output = path.join(outdir, `${file_name}.html`)
 
-let sidebar_css = '<style>\n'
-const root_css = path.join(frontend_root, 'css')
-fs.readdirSync(root_css).forEach((file_name) => {
-  const file_path = path.join(root_css, file_name)
-  sidebar_css = sidebar_css.concat(fs.readFileSync(file_path).toString())
+  const css = fs.readFileSync(file_path_input).toString()
+  fs.writeFileSync(file_path_output, `<style>${css}</style>`)
 })
-sidebar_css = sidebar_css.concat('\n</style>')
-fs.writeFileSync(path.join(outdir, 'sidebar-css.html'), sidebar_css)
+
+const js_root = path.join(frontend_root, 'js')
+fs.readdirSync(js_root).forEach((file_name) => {
+  const file_path_input = path.join(js_root, file_name)
+  const file_path_output = path.join(outdir, `${file_name}.html`)
+
+  const js = fs.readFileSync(file_path_input).toString()
+  fs.writeFileSync(file_path_output, `<script>${js}</script>`)
+})

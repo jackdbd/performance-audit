@@ -61,3 +61,23 @@ export const runtestParamsFromMatrix = ({
 function includeHTML(filename: string) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent()
 }
+
+export const getPreviousNMonths = (n: number): string[] => {
+  const d = new Date()
+  const arr: string[] = []
+
+  for (let i = 0; i < n; i++) {
+    let month = d.getMonth() - i
+    let year = d.getFullYear()
+
+    if (month < 0) {
+      month += 12
+      year -= 1
+    }
+
+    const mm = `${month}`.padStart(2, '0')
+    arr.push(`${year}${mm}`)
+  }
+
+  return arr
+}

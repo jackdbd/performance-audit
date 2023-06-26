@@ -1,9 +1,9 @@
-import { MENU, SHEET_NAME } from './constants'
+import { CRUX_QUERY, MENU, SHEET_NAME } from './constants'
 import { headersAndRows } from './spreadsheet'
 
 const menuItemOne = () => {
   // https://developers.google.com/apps-script/reference/html/html-service.html#createTemplateFromFile(String)
-  const template = HtmlService.createTemplateFromFile('sidebar.html')
+  const template = HtmlService.createTemplateFromFile('sidebar-wpt.html')
 
   const { rows: params_rows } = headersAndRows(SHEET_NAME.WPT_RUNTEST_PARAMS)
   const wpt_profiles = params_rows.map((_row, i) => {
@@ -27,10 +27,25 @@ const menuItemOne = () => {
   SpreadsheetApp.getUi().showSidebar(html_output)
 }
 
+const menuItemTwo = () => {
+  const template = HtmlService.createTemplateFromFile('dialog-crux-query.html')
+
+  template.sql = CRUX_QUERY
+  template.url = 'https://www.google.com'
+  template.crux_months = getPreviousNMonths(3)
+
+  const html_output = template.evaluate().setWidth(800).setHeight(600)
+
+  SpreadsheetApp.getUi().showModalDialog(
+    html_output,
+    'Query the BigQuery CrUX dataset'
+  )
+}
+
 export const addCustomMenuToUi = () => {
   SpreadsheetApp.getUi()
     .createMenu(MENU.TITLE)
     .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemOne')
-    .addItem('Run query on BigQuery CrUX dataset', 'runDemoQuery')
+    .addItem(MENU.ITEM_TWO_CAPTION, 'menuItemTwo')
     .addToUi()
 }

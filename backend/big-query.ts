@@ -1,63 +1,63 @@
+import { CRUX_QUERY } from './constants'
+
 export interface RunQueryOptions {
-  project_id?: string
-  url?: string
+  maximum_bytes_billed?: number
   months?: number[]
+  project_id?: string
   query_timeout_ms?: number
+  url?: string
+}
+
+export interface TagDict {
+  [tag: string]: boolean
+}
+
+const tagReducer = (d: TagDict, tag: string) => {
+  d[tag] = true
+  return d
 }
 
 /**
- * Runs a BigQuery query and logs the results in a spreadsheet.
+ * Runs a parameterized query on the BigQuery CrUX dataset and writes the
+ * results into a new sheet in the active spreadsheet.
+ *
+ * @param {Object} options Configuration for the query.
+ * @return {Object} Recap of the operation.
+ * @customFunction
  * @see {@link https://developers.google.com/identity/protocols/oauth2/scopes#bigquery BigQuery API v2 OAuth scopes}
  */
 function runQueryOnCrux(options: RunQueryOptions = {}) {
+  const tags = ['bigquery', 'crux']
+
+  Logger.log({
+    message:
+      'run Query on CrUX using these options (see JSON payload in Cloud Logging)',
+    options,
+    severity: 'INFO',
+    tags,
+    tag: tags.reduce(tagReducer, {})
+  })
+
   // Each queryParameters[] parameterValue's value must be a string;
   // The BigQuery API will cast it to the queryParameters[] parameterType's type
   const url = options.url || 'https://www.google.com/'
   const months = options.months || [202301, 202302, 202303]
   const project_id = options.project_id || 'prj-kitchen-sink'
-  // const dataset_id = options.dataset_id || 'weather_data';
-  // const table_id = options.table_id || 'weather_data_table';
   const query_timeout_ms = options.query_timeout_ms || 5000
-
-  const query = `
-WITH cte AS (
-  SELECT
-    yyyymm,
-    \`chrome-ux-report.experimental\`.GET_COUNTRY(country_code) AS country,
-    rank,
-    desktopDensity,
-    phoneDensity,
-    tabletDensity
-  FROM
-    \`chrome-ux-report.materialized.country_summary\`
-  WHERE
-    origin = @url
-  AND yyyymm IN UNNEST(@months)
-)
-SELECT
-  country,
-  ROUND(AVG(rank)) AS coarse_popularity,
-  COUNT(DISTINCT yyyymm) AS months_in_crux,
-  SAFE_MULTIPLY(ROUND(SUM(desktopDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS desktop_traffic,
-  SAFE_MULTIPLY(ROUND(SUM(phoneDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS phone_traffic,
-  SAFE_MULTIPLY(ROUND(SUM(tabletDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS tablet_traffic
-FROM
-  cte
-GROUP BY
-  country
-ORDER BY
-  coarse_popularity ASC`
+  // Set maximumBytesBilled to control the costs and avoid unexpected billing charges
+  // https://cloud.google.com/bigquery/docs/best-practices-costs#limit_query_costs_by_restricting_the_number_of_bytes_billed
+  const maximumBytesBilled = options.maximum_bytes_billed || 12_000_000_000
 
   const arr_values_months = months.map((value) => {
     return { value: value as any }
   })
-  // console.log('arr_values_months', arr_values_months)
 
   // https://cloud.google.com/bigquery/docs/reference/rest/v2/Job
-  // TODO: consider setting maximumBytesBilled
+
   const request = {
     // dryRun: true,
     dryRun: false,
+    maximumBytesBilled,
     parameterMode: 'NAMED',
     // https://cloud.google.com/bigquery/docs/reference/rest/v2/QueryParameter
     // https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#data_type_sizes
@@ -73,7 +73,7 @@ ORDER BY
         parameterValue: { arrayValues: arr_values_months }
       }
     ],
-    query,
+    query: CRUX_QUERY,
     timeoutMs: query_timeout_ms,
     useLegacySql: false
   }
@@ -111,10 +111,11 @@ ORDER BY
     }
   }
 
-  // console.log(`DATA ${data.length} rows`, data)
-
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-  const sheet_name = `CrUX ${url}_${months.join('_')}`
+  const u = new URL(url)
+  const domain = u.origin.replace('https://', '')
+  const sheet_name = `CrUX ${domain}_${months.join('_')}`
+  // const sheet_name = `CrUX ${url}_${months.join('_')}`
 
   let sheet = spreadsheet.getSheetByName(sheet_name)
   if (sheet != null) {
@@ -133,14 +134,21 @@ ORDER BY
 
   range = sheet.getRange(2, 1, rows.length, sheet.getLastColumn())
   range.setValues(data)
+
+  return {
+    message: `Retrieved data from CrUX. Added sheet ${sheet_name} in currently active spreadsheet`
+  }
 }
 
-function TEST_QUERY_TIRRENO() {
+function TEST_QUERY_CRUX_TIRRENO_IT() {
   runQueryOnCrux({ url: 'https://www.iltirreno.it' })
 }
 
-function TEST_QUERY_VINO() {
-  runQueryOnCrux({ url: 'https://www.vino.com', months: [202304, 202305] })
+function TEST_QUERY_CRUX_VINO_COM() {
+  runQueryOnCrux({
+    url: 'https://www.vino.com',
+    months: [202303, 202304, 202305]
+  })
 }
 
 function runDemoQuery(options: any = {}) {
