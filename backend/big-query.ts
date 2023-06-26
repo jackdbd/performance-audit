@@ -1,4 +1,5 @@
 import { CRUX_QUERY } from './constants'
+import { logJSON } from './utils'
 
 export interface RunQueryOptions {
   maximum_bytes_billed?: number
@@ -6,15 +7,6 @@ export interface RunQueryOptions {
   project_id?: string
   query_timeout_ms?: number
   url?: string
-}
-
-export interface TagDict {
-  [tag: string]: boolean
-}
-
-const tagReducer = (d: TagDict, tag: string) => {
-  d[tag] = true
-  return d
 }
 
 /**
@@ -27,16 +19,22 @@ const tagReducer = (d: TagDict, tag: string) => {
  * @see {@link https://developers.google.com/identity/protocols/oauth2/scopes#bigquery BigQuery API v2 OAuth scopes}
  */
 function runQueryOnCrux(options: RunQueryOptions = {}) {
-  const tags = ['bigquery', 'crux']
-
-  Logger.log({
+  // const tags = ['bigquery', 'crux']
+  logJSON({
     message:
       'run Query on CrUX using these options (see JSON payload in Cloud Logging)',
-    options,
-    severity: 'INFO',
-    tags,
-    tag: tags.reduce(tagReducer, {})
+    tags: ['bigquery', 'crux'],
+    options
   })
+
+  // Logger.log({
+  //   message:
+  //     'run Query on CrUX using these options (see JSON payload in Cloud Logging)',
+  //   options,
+  //   severity: 'INFO',
+  //   tags,
+  //   tag: tags.reduce(tagReducer, {})
+  // })
 
   // Each queryParameters[] parameterValue's value must be a string;
   // The BigQuery API will cast it to the queryParameters[] parameterType's type

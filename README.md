@@ -1,15 +1,17 @@
-# performance audit
+# Performance Audit
 
 [![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)
 [![CI workflow](https://github.com/jackdbd/performance-audit/actions/workflows/ci.yaml/badge.svg)](https://github.com/jackdbd/performance-audit/actions/workflows/ci.yaml)
 
-Google App Script [bound to a Google Sheets](https://developers.google.com/apps-script/guides/bound) optimized to bypass consent banners.
+Google Sheets that I use to retrieve **field data** from [CrUX BigQuery dataset](https://developer.chrome.com/docs/crux/bigquery/) and generate **lab data** from the [WebPageTest API](https://docs.webpagetest.org/api/reference/).
+
+> :information_source: Read [this article](https://web.dev/lab-and-field-data-differences/) to understand the difference between field data and lab data.
 
 Inspired by [WebPageTest Google Sheets Bulk Tester](https://github.com/WebPageTest/WebPageTest-Bulk-Tester).
 
 ## How to use it?
 
-TODO: copy the original Google Sheets, etc...
+This Apps Script project is [bound to a single Google Sheets](https://developers.google.com/apps-script/guides/bound), so it behaves like an **unpublished** [Editor Add-on](https://developers.google.com/apps-script/add-ons/concepts/types#editor-add-ons). In order to use it, you need to **copy** [this Google Sheets](https://docs.google.com/spreadsheets/d/12Z3HBsRuuJp8yXTa9uaK2CzY6so_uIOrRGa8kaq8ZPk).
 
 ## Configuration
 
@@ -27,21 +29,21 @@ npm install
 
 ## Test
 
-Watch files and run tests in watch mode with [vitest](https://vitest.dev/):
+Run tests in watch mode with [vitest](https://vitest.dev/).
 
 ```sh
 npm run test
 ```
 
-Run all tests and generate a coverage reports.
+Run all tests once and generate a coverage reports.
 
 ```sh
-npm run coverage
+npm run test:coverage
 ```
 
 ## Deploy
 
-Push changes to the Google Apps Script server.
+Push changes to the Google Apps Script server. The code pushed will be the [head deployment](https://developers.google.com/apps-script/concepts/deployments#head_deployments) of this [container-bound Apps Script](https://developers.google.com/apps-script/guides/bound) project.
 
 ```sh
 npm run deploy
@@ -67,3 +69,5 @@ npx clasp open
 - Project Settings File (i.e. `.clasp.json`): see [here](https://github.com/google/clasp#project-settings-file-claspjson).
 - OAuth scopes: see [here](https://developers.google.com/apps-script/add-ons/concepts/workspace-scopes) and [here](https://developers.google.com/apps-script/add-ons/concepts/editor-scopes).
 - Invoke an Apps Script function remotely: see [here](https://github.com/google/clasp/blob/master/docs/run.md).
+
+CrUX datasets by Google are licensed under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).

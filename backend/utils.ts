@@ -58,7 +58,7 @@ export const runtestParamsFromMatrix = ({
   return matrix_params as Param[][]
 }
 
-function includeHTML(filename: string) {
+export function includeHTML(filename: string) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent()
 }
 
@@ -80,4 +80,33 @@ export const getPreviousNMonths = (n: number): string[] => {
   }
 
   return arr
+}
+
+export interface TagDict {
+  [tag: string]: boolean
+}
+
+export function tagReducer(d: TagDict, tag: string) {
+  d[tag] = true
+  return d
+}
+
+export interface LogStatement {
+  message: string
+  severity?: string
+  tags?: string[]
+}
+
+export function logJSON<T extends LogStatement>(cfg: T) {
+  const { message, severity: cfg_severity, tags: cfg_tags, ...rest } = cfg
+  const severity = cfg_severity || 'DEBUG'
+  const tags = cfg_tags || []
+
+  Logger.log({
+    message,
+    severity,
+    tags,
+    tag: tags.reduce(tagReducer, {}),
+    ...rest
+  })
 }

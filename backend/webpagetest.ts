@@ -1,3 +1,4 @@
+import { logJSON } from './utils'
 import type { Param } from './utils'
 
 /**
@@ -121,15 +122,10 @@ export const runtest = ({
 }: RunTestConfig) => {
   const script = wpt_script
 
-  const payload = JSON.stringify(
-    { ...profile, inject_script, script, url },
-    null,
-    2
-  )
-  // This logger seems not to show anything but `message`.
-  Logger.log({
+  logJSON({
+    message: `WPT runtest parameters (see JSON payload)`,
+    tags: ['webpagetest'],
     ...profile,
-    message: `WPT runtest parameters (see payload): ${payload}`,
     inject_script,
     script,
     url
@@ -138,9 +134,12 @@ export const runtest = ({
   const params = [
     ...profile,
     { key: 'f', value: 'json' },
-    { key: 'k', value: GET_WEBPAGETEST_API_KEY() },
     { key: 'url', value: url }
   ]
+  const k = GET_WEBPAGETEST_API_KEY()
+  if (k) {
+    params.push({ key: 'k', value: k })
+  }
   if (inject_script) {
     params.push({ key: 'injectScript', value: inject_script })
   }

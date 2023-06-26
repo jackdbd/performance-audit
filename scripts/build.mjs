@@ -19,6 +19,7 @@ const processTypeScriptFile = (file_path) => {
     `// import stripped by ${NAME}\n`
   )
   s = s.replaceAll(/export const/g, 'const')
+  s = s.replaceAll(/export function/g, 'function')
   s = s.replaceAll(/export interface/g, 'interface')
   return s
 }

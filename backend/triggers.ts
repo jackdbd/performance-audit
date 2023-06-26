@@ -1,4 +1,5 @@
 import { addCustomMenuToUi } from './menu'
+import { logJSON } from './utils'
 
 /**
  * Trigger that runs when this Google Sheets is opened.
@@ -8,4 +9,8 @@ import { addCustomMenuToUi } from './menu'
  */
 const onOpen = (_ev: GoogleAppsScript.Events.SheetsOnOpen) => {
   addCustomMenuToUi()
+  logJSON({
+    message: 'added custom menu to Google Sheets UI',
+    tags: ['sheets', 'trigger', 'ui']
+  })
 }
