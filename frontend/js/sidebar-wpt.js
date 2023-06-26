@@ -1,5 +1,3 @@
-const PREFIX = '[performance audit] '
-
 const SELECTOR = {
   FORM: 'form[name="Audit"]',
   INJECT_SCRIPT: '#inject-script',
@@ -7,12 +5,7 @@ const SELECTOR = {
   WPT_SCRIPT: '#wpt-script'
 }
 
-const SHEET_NAME = {
-  COOKIES: 'cookies',
-  WPT_RUNTEST_PARAMS: 'WPT /runtest params'
-}
-
-const DEFAULT_INITIAL_STATE = {
+const INITIAL_STATE = {
   cookies: [],
   cookies_for_wpt_runtest: [],
   inject_script: undefined,
@@ -27,36 +20,6 @@ const DEFAULT_CONFIG = {
     'navigate %URL%',
     "execAndWait document.querySelector('#accept-cookies').click()"
   ]
-}
-
-function onError(error) {
-  const message = error.message || 'got an error with no message'
-  console.error(`${PREFIX} error`, error)
-  alert(`ERROR: ${message}`)
-}
-
-const useState = (initial_state = DEFAULT_INITIAL_STATE) => {
-  let __state = initial_state
-  console.group(`${PREFIX} initial state`)
-  console.table({ state: initial_state })
-  console.groupEnd()
-
-  return {
-    getState: () => {
-      console.group(`${PREFIX} getState`)
-      console.table({ state: __state })
-      console.groupEnd()
-      return __state
-    },
-    setState: (chunk) => {
-      const old = __state
-      // https://developer.mozilla.org/en-US/docs/Web/API/structuredClone
-      __state = structuredClone({ ...old, ...chunk })
-      console.group(`${PREFIX} setState`)
-      console.table({ old, chunk, new: __state })
-      console.groupEnd()
-    }
-  }
 }
 
 function getValueFromSelector(selector) {
@@ -264,7 +227,7 @@ window.onload = (_ev) => {
     alert(`Selector ${SELECTOR.URL_TO_AUDIT} found nothing on this page`)
   }
 
-  const { getState, setState } = useState()
+  const { getState, setState } = useState(INITIAL_STATE)
 
   const onGotAllCookies = makeOnGotAllCookies({ setState })
   const onGotProfiles = makeOnGotProfiles({ getState, setState })

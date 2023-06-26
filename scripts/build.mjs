@@ -61,7 +61,7 @@ fs.readdirSync(css_root).forEach((file_name) => {
   const file_path_output = path.join(outdir, `${file_name}.html`)
 
   const css = fs.readFileSync(file_path_input).toString()
-  fs.writeFileSync(file_path_output, `<style>${css}</style>`)
+  fs.writeFileSync(file_path_output, `<style>\n${css}</style>`)
 })
 
 const js_root = path.join(frontend_root, 'js')
@@ -70,5 +70,5 @@ fs.readdirSync(js_root).forEach((file_name) => {
   const file_path_output = path.join(outdir, `${file_name}.html`)
 
   const js = fs.readFileSync(file_path_input).toString()
-  fs.writeFileSync(file_path_output, `<script>${js}</script>`)
+  fs.writeFileSync(file_path_output, `<script defer>\n${js}</script>`)
 })

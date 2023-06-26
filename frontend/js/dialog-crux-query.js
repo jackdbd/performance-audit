@@ -1,13 +1,5 @@
-const PREFIX = '[performance audit] '
-
 const SELECTOR = {
   FORM: 'form[name="CrUX query"]'
-}
-
-function onError(error) {
-  const message = error.message || 'got an error with no message'
-  console.error(`${PREFIX} error`, error)
-  alert(`ERROR: ${message}`)
 }
 
 function onSuccess(value) {
