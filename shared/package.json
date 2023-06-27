@@ -1,0 +1,11 @@
+{
+  "name": "shared",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devpendencies": {},
+  "devDependencies": {}
+}

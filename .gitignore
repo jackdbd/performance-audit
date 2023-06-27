@@ -3,6 +3,7 @@ coverage/
 
 # vitest HTML report
 html/
+dialog-crux-query/html/
 
 # build artifacts
 dist/

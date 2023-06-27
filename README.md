@@ -41,6 +41,16 @@ Run all tests once and generate a coverage reports.
 npm run test:coverage
 ```
 
+## Development
+
+Run a [vite](https://vitejs.dev/guide/) dev server for each of the frontend components.
+
+```sh
+npm run dev
+```
+
+Each frontend component will be served as a standalone web app on a different port (e.g. 5173, 5174).
+
 ## Deploy
 
 Push changes to the Google Apps Script server. The code pushed will be the [head deployment](https://developers.google.com/apps-script/concepts/deployments#head_deployments) of this [container-bound Apps Script](https://developers.google.com/apps-script/guides/bound) project.

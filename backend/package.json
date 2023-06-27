@@ -1,0 +1,12 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devpendencies": {},
+  "devDependencies": {}
+}

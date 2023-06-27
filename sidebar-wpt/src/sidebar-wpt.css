@@ -1,0 +1,17 @@
+#inject-script,
+#wpt-script {
+  min-height: 8em;
+  width: 100%;
+}
+
+#url-to-audit {
+  width: 100%;
+}
+
+#inject-script[data-state="just-updated"],
+#wpt-script[data-state="just-updated"] {
+  animation-name: flash;
+  animation-duration: 1500ms;
+  animation-iteration-count: 1;
+  background-color: white;
+}
