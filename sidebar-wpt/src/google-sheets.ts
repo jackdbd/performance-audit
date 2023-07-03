@@ -57,24 +57,24 @@ export const subscribeStateToGoogleSheetsDev = () => {
   return [id_edit_url, id_edit_wpt_profiles]
 }
 
+export const retrieveSpreadsheetData = () => {
+  console.log(
+    `${PREFIX}retrieve spreadsheet ${SHEET_NAME.WPT_RUNTEST_PARAMS} from Apps Script server`
+  )
+  google.script.run
+    .withFailureHandler(onError)
+    .withSuccessHandler(onGotHeadersAndRows)
+    .headersAndRows(SHEET_NAME.WPT_RUNTEST_PARAMS)
+}
+
 export const subscribeStateToGoogleSheetsProd = () => {
   if (!import.meta.env.PROD) {
     throw new Error(`this function should be called only in production`)
   }
 
   const ms = 5000
-
-  // TODO: use onEdit(e), not polling
-  const pollAppsScriptServer = () => {
-    console.log(`${PREFIX}poll Apps Script server for data (every ${ms}ms)`)
-    google.script.run
-      .withFailureHandler(onError)
-      .withSuccessHandler(onGotHeadersAndRows)
-      .headersAndRows(SHEET_NAME.WPT_RUNTEST_PARAMS)
-  }
-
-  const id_poll = setInterval(pollAppsScriptServer, ms)
-
+  console.log(`${PREFIX}poll Apps Script server for data (every ${ms}ms)`)
+  const id_poll = setInterval(retrieveSpreadsheetData, ms)
   return [id_poll]
 }
 
