@@ -9,6 +9,30 @@ Retrieve field performance data from the [CrUX BigQuery dataset](https://develop
 
 ## How to use it?
 
+<!-- markdownlint-disable MD033 -->
+<figure>
+  <video width="640" height="480" autoplay loop controls>
+    <source
+      type="video/mp4"
+      src="https://github.com/jackdbd/performance-audit/raw/main/assets/videos/demo-first-visit-with-subs.mp4">
+    Your browser does not support HTML5 video tag.
+  </video>
+  <figcaption>First visit</figcaption>
+</figure>
+<!-- markdownlint-enable MD033 -->
+
+<!-- markdownlint-disable MD033 -->
+<figure>
+  <video width="640" height="480" autoplay loop controls>
+    <source
+      type="video/mp4"
+      src="https://github.com/jackdbd/performance-audit/raw/main/assets/videos/demo-second-visit-with-subs.mp4">
+    Your browser does not support HTML5 video tag.
+  </video>
+  <figcaption>Repeat visit</figcaption>
+</figure>
+<!-- markdownlint-enable MD033 -->
+
 This is a [Google Apps Script](https://developers.google.com/apps-script) project bound to a Google Sheets spreadsheet. [Bound scripts](https://developers.google.com/apps-script/guides/bound) are effectively unpublished Apps Script Editor add-on that function only for the file they are bound to.
 
 If you want to use this tool, you just need to create a copy of [this spreadsheet](https://docs.google.com/spreadsheets/d/12Z3HBsRuuJp8yXTa9uaK2CzY6so_uIOrRGa8kaq8ZPk/) by clicking on `File` > `Make a copy`.
