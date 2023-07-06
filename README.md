@@ -9,29 +9,9 @@ Retrieve field performance data from the [CrUX BigQuery dataset](https://develop
 
 ## How to use it?
 
-<!-- markdownlint-disable MD033 -->
-<figure>
-  <video width="640" height="480" autoplay loop controls>
-    <source
-      type="video/mp4"
-      src="https://github.com/jackdbd/performance-audit/raw/main/assets/videos/demo-first-visit-with-subs.mp4">
-    Your browser does not support HTML5 video tag.
-  </video>
-  <figcaption>First visit</figcaption>
-</figure>
-<!-- markdownlint-enable MD033 -->
+https://github.com/jackdbd/performance-audit/assets/5048090/05f3d619-5f53-4df2-b01e-b0edcfbb8112
 
-<!-- markdownlint-disable MD033 -->
-<figure>
-  <video width="640" height="480" autoplay loop controls>
-    <source
-      type="video/mp4"
-      src="https://github.com/jackdbd/performance-audit/raw/main/assets/videos/demo-second-visit-with-subs.mp4">
-    Your browser does not support HTML5 video tag.
-  </video>
-  <figcaption>Repeat visit</figcaption>
-</figure>
-<!-- markdownlint-enable MD033 -->
+https://github.com/jackdbd/performance-audit/assets/5048090/67e9f06e-96a2-4217-81a8-7e48920516cf
 
 This is a [Google Apps Script](https://developers.google.com/apps-script) project bound to a Google Sheets spreadsheet. [Bound scripts](https://developers.google.com/apps-script/guides/bound) are effectively unpublished Apps Script Editor add-on that function only for the file they are bound to.
 
