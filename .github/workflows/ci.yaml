@@ -17,8 +17,8 @@ jobs:
         # Test all packages with:
         # 1. Active LTS
         # 2. Current (i.e. the latest Node.js version available)
-        # https://nodejs.org/en/
-        node: ['18.16.0', 'current']
+        # https://github.com/nodejs/release#release-schedule
+        node: ['lts/hydrogen', 'current']
     steps:
       - name: 🛎️ Checkout repo
         uses: actions/checkout@v3

@@ -33,6 +33,7 @@
     "clean": "rm -rf dist",
     "deploy": "run-s clean build clasp:push",
     "dev": "run-p dev:*",
+    "dev:backend": "npm run dev -w backend",
     "dev:dialog-crux-query": "npm run dev -w dialog-crux-query",
     "dev:sidebar-wpt": "npm run dev -w sidebar-wpt",
     "test": "run-s --print-label test:backend test:dialog-crux-query test:sidebar-wpt",

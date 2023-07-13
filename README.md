@@ -54,19 +54,17 @@ npm run test:coverage
 
 This project consists of some backend code and frontend components.
 
-In production, the backend code runs on the Apps Script servers, which host a [V8-based runtime](https://developers.google.com/apps-script/guides/v8-runtime) somewhat similar to Node.js. Each frontend component is executed in an `<iframe>` for [security reasons](https://developers.google.com/apps-script/guides/html/restrictions).
+In production, the backend code runs on the Apps Script servers, which host a [V8-based runtime](https://developers.google.com/apps-script/guides/v8-runtime) somewhat similar to Node.js. Each frontend component is sandboxed in an `<iframe>` for [security reasons](https://developers.google.com/apps-script/guides/html/restrictions).
 
 In development, the backend code runs on Node.js. Each frontend component is a standalone web app that can be run on a different port. This make developing each frontend component easy using [vite](https://vitejs.dev/guide/).
 
-Run a vite dev server for each of the frontend components.
+Watch the backend code and run a vite dev server for each frontend component.
 
 ```sh
 npm run dev
 ```
 
 Each frontend component will be served as a standalone web app on a different port (e.g. 5173, 5174).
-
-clasp will take care of transpiling TypeScript code into Google Apps Script code [when you push it](https://developers.google.com/apps-script/guides/typescript), so you don't have to worry about that.
 
 ## Deploy
 
@@ -75,6 +73,8 @@ Push changes to the Google Apps Script server. The code pushed will be the [head
 ```sh
 npm run deploy
 ```
+
+clasp will take care of transpiling TypeScript code into Google Apps Script code [when you push it](https://developers.google.com/apps-script/guides/typescript).
 
 > :information_source: I prefer to deploy this script manually, because deploying it automatically from the CI workflow would require to store the `.clasprc.json` credentials in a GitHub secret.
 
