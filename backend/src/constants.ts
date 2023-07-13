@@ -7,8 +7,25 @@ export const SHEET_NAME = {
 export const MENU = {
   TITLE: 'Performance Audit',
   ITEM_ONE_CAPTION: 'Define WebPageTest tests',
-  ITEM_TWO_CAPTION: 'Define query on BigQuery CrUX dataset'
+  ITEM_TWO_CAPTION: 'Define query on BigQuery CrUX dataset',
+  ITEM_THREE_CAPTION:
+    'Retrieve field performance data from the CrUX History API'
 }
+
+export const CRUX_HISTORY_API_DEFAULTS = {
+  FORM_FACTOR: undefined,
+  URL: 'https://web.dev/ttfb/'
+}
+
+export const CRUX_HISTORY_API_METRICS = [
+  'cumulative_layout_shift',
+  'first_contentful_paint',
+  'first_input_delay',
+  'interaction_to_next_paint',
+  'largest_contentful_paint',
+  // 'experimental_interaction_to_next_paint', // deprecated in August 2023
+  'experimental_time_to_first_byte'
+]
 
 export const CRUX_QUERY = `
 WITH cte AS (

@@ -46,7 +46,7 @@ export const subscribeStateToLocalStorage = () => {
   return setInterval(cb, ms)
 }
 
-export const initLocalStorage = () => {
+export const populateLocalStorageWithFakes = () => {
   localStorage.clear()
 
   const arr = [

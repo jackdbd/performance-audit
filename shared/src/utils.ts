@@ -4,6 +4,7 @@ export const onError = (error: any) => {
   const message = error.message || 'got an error with no message'
   console.error(`${PREFIX} error`, error)
   alert(`ERROR: ${message}`)
+  google.script.host.close()
 }
 
 export const useState = (initial_state = {}) => {

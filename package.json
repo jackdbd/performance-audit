@@ -16,6 +16,7 @@
   ],
   "workspaces": [
     "backend",
+    "dialog-crux-history",
     "dialog-crux-query",
     "shared",
     "sidebar-wpt"
@@ -23,6 +24,7 @@
   "scripts": {
     "build": "run-s --print-label build:*",
     "build:backend": "npm run build -w backend",
+    "build:dialog-crux-history": "npm run build -w dialog-crux-history && mkdir -p dist/dialog-crux-history && cp -r dialog-crux-history/dist/* dist/dialog-crux-history",
     "build:dialog-crux-query": "npm run build -w dialog-crux-query && mkdir -p dist/dialog-crux-query && cp -r dialog-crux-query/dist/* dist/dialog-crux-query",
     "build:sidebar-wpt": "npm run build -w sidebar-wpt && mkdir -p dist/sidebar-wpt && cp -r sidebar-wpt/dist/* dist/sidebar-wpt",
     "clasp:deployments": "clasp deployments",
@@ -31,33 +33,42 @@
     "clasp:status": "clasp status",
     "clasp:versions": "clasp versions",
     "clean": "rm -rf dist",
+    "crux:aggregated": "tsm scripts/crux.ts --url https://web.dev/ttfb/",
+    "crux:desktop": "tsm scripts/crux.ts --url https://web.dev/ttfb/ --form-factor DESKTOP",
+    "crux:phone": "tsm scripts/crux.ts --url https://web.dev/ttfb/ --form-factor PHONE",
+    "crux:tablet": "tsm scripts/crux.ts --url https://web.dev/ttfb/ --form-factor TABLET",
     "deploy": "run-s clean build clasp:push",
     "dev": "run-p dev:*",
     "dev:backend": "npm run dev -w backend",
+    "dev:dialog-crux-history": "npm run dev -w dialog-crux-history",
     "dev:dialog-crux-query": "npm run dev -w dialog-crux-query",
     "dev:sidebar-wpt": "npm run dev -w sidebar-wpt",
-    "test": "run-s --print-label test:backend test:dialog-crux-query test:sidebar-wpt",
+    "test": "run-s --print-label test:backend test:dialog-crux-history test:dialog-crux-query test:sidebar-wpt",
     "test:backend": "npm run test -w backend",
+    "test:dialog-crux-history": "npm run test -w dialog-crux-history",
     "test:dialog-crux-query": "npm run test -w dialog-crux-query",
     "test:sidebar-wpt": "npm run test -w sidebar-wpt",
-    "test:coverage": "npm run test:coverage:backend && npm run test:coverage -w dialog-crux-query && npm run test:coverage -w sidebar-wpt",
+    "test:coverage": "npm run test:coverage:backend && npm run test:coverage -w dialog-crux-history && npm run test:coverage -w dialog-crux-query && npm run test:coverage -w sidebar-wpt",
     "test:coverage:backend": "npm run test:coverage -w backend"
   },
-  "dependencies": {},
   "devDependencies": {
     "@google/clasp": "^2.4.2",
     "@preact/preset-vite": "^2.5.0",
     "@testing-library/dom": "^9.3.1",
     "@testing-library/preact": "^3.2.3",
     "@types/google-apps-script": "^1.0.64",
+    "@types/yargs": "^17.0.24",
     "@vitest/coverage-v8": "^0.32.2",
+    "fast-csv": "^4.3.6",
     "happy-dom": "^9.20.3",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.8",
     "rollup-plugin-visualizer": "^5.9.2",
+    "tsm": "^2.3.0",
     "typescript": "^5.0.2",
     "vite": "^4.3.9",
     "vite-plugin-singlefile": "^0.13.5",
-    "vitest": "^0.32.2"
+    "vitest": "^0.32.2",
+    "yargs": "^17.7.2"
   }
 }

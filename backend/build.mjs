@@ -21,6 +21,7 @@ const processTypeScriptFile = (file_path) => {
   s = s.replaceAll(/export const/g, 'const')
   s = s.replaceAll(/export function/g, 'function')
   s = s.replaceAll(/export interface/g, 'interface')
+  s = s.replaceAll(/export type/g, 'type')
   return s
 }
 

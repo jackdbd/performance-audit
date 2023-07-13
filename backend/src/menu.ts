@@ -28,10 +28,24 @@ export const menuItemCrUXDialog = () => {
   )
 }
 
+export const menuItemCrUXHistoryAPIDialog = () => {
+  const html_output = HtmlService.createHtmlOutputFromFile(
+    'dialog-crux-history/index.html'
+  )
+    .setWidth(600)
+    .setHeight(400)
+
+  SpreadsheetApp.getUi().showModalDialog(
+    html_output,
+    'Query the CrUX History API'
+  )
+}
+
 export const addCustomMenuToUi = () => {
   SpreadsheetApp.getUi()
     .createMenu(MENU.TITLE)
     .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemWPTSidebar')
     .addItem(MENU.ITEM_TWO_CAPTION, 'menuItemCrUXDialog')
+    .addItem(MENU.ITEM_THREE_CAPTION, 'menuItemCrUXHistoryAPIDialog')
     .addToUi()
 }

@@ -19,7 +19,6 @@ export interface RunQueryOptions {
  * @see {@link https://developers.google.com/identity/protocols/oauth2/scopes#bigquery BigQuery API v2 OAuth scopes}
  */
 function runQueryOnCrux(options: RunQueryOptions = {}) {
-  // const tags = ['bigquery', 'crux']
   logJSON({
     message:
       'run Query on CrUX using these options (see JSON payload in Cloud Logging)',
@@ -225,17 +224,6 @@ function runDemoQuery(options: any = {}) {
   sheet.setName(sheet_name)
 
   const headers = query_response.schema.fields.map((f) => f.name)
-  // const headers = [
-  //   'sensor_id',
-  //   'time_collected',
-  //   'zipcode',
-  //   'latitude',
-  //   'longitude',
-  //   'temperature',
-  //   'humidity',
-  //   'dewpoint',
-  //   'pressure'
-  // ]
   let range = sheet.getRange(1, 1, 1, headers.length)
   range.setBackgroundRGB(255, 255, 0)
   range.setFontWeight('bold')

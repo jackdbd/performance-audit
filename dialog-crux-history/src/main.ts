@@ -11,12 +11,11 @@ interface Success {
 function onSuccess(value: Success) {
   // https://developers.google.com/apps-script/guides/html/reference/host
   google.script.host.close()
-  // alert(`SUCCESS! ${JSON.stringify(value, null, 2)}`)
   console.log(`${PREFIX}${value.message}`)
+  // alert(`SUCCESS! ${JSON.stringify(value, null, 2)}`)
 }
 
 function onSubmit(ev: Event) {
-  // alert(`TODO: implement form submit`)
   ev.preventDefault()
 
   // a form submit is an installable trigger
@@ -27,15 +26,38 @@ function onSubmit(ev: Event) {
   // TODO: if I create an installable trigger for the form submit, there should
   // be no need to call `google.script.run` from the frontend, and the backend
   // would automatically receive the data from the form.
-  const options = {
-    url: 'https://www.vino.com',
-    maximum_bytes_billed: 15_000_000_000
+
+  const el_crux_url = document.querySelector(
+    SELECTOR.CRUX_URL
+  ) as HTMLInputElement | null
+  if (!el_crux_url) {
+    return
   }
 
-  google.script.run
-    .withFailureHandler(onError)
-    .withSuccessHandler(onSuccess)
-    .runQueryOnCrux(options)
+  const el_crux_form_factor = document.querySelector(
+    SELECTOR.CRUX_FORM_FACTOR
+  ) as HTMLSelectElement | null
+  if (!el_crux_form_factor) {
+    return
+  }
+
+  const options = {
+    url: el_crux_url.value,
+    form_factor: el_crux_form_factor.value
+  }
+
+  if (import.meta.env.DEV) {
+    console.log('dev')
+    console.log('url value', el_crux_url.value)
+    console.log('form factor value', el_crux_form_factor.value)
+    // TODO: use dotenv to load the CrUX API as env variable
+    // https://vitejs.dev/guide/env-and-mode.html
+  } else {
+    google.script.run
+      .withFailureHandler(onError)
+      .withSuccessHandler(onSuccess)
+      .callCrUXHistoryAPI(options)
+  }
 }
 
 window.onload = (_ev) => {

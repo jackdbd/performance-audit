@@ -2,20 +2,14 @@ import { render } from 'preact'
 import { PREFIX } from '../../shared/src/constants'
 import { App } from './App.tsx'
 import { retrieveSpreadsheetData } from './google-sheets'
-import { initLocalStorage } from './local-storage'
-// import { subscribeStateToLocalStorage } from './local-storage'
+import { populateLocalStorageWithFakes } from './local-storage'
 
 if (import.meta.env.DEV) {
-  initLocalStorage()
+  populateLocalStorageWithFakes()
+  console.log(`${PREFIX}how to retrieve Google Sheets data in development? Maybe fake it?`)
+} else {
+  retrieveSpreadsheetData()
 }
-
-retrieveSpreadsheetData()
-
-// subscribeStateToGoogleSheets()
-// console.log(`${PREFIX}state subscribed to Google Sheets`)
-
-// subscribeStateToLocalStorage()
-// console.log(`${PREFIX}state subscribed to localStorage`)
 
 window.onload = (_ev) => {
   console.log(`${PREFIX}window.load event fired`)

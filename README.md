@@ -24,9 +24,11 @@ If you want to modify the Apps Script project tied to the spreadsheet, you essen
 
 ## Configuration
 
-Copy your WebPageTest API key in the [Script Properties](https://developers.google.com/apps-script/guides/properties). Only those ones that have access to your Google Sheets will be able to view these properties. Properties are never shared between scripts.
+Copy your CrUX API key and your WebPageTest API key, and paste them in the [Script Properties](https://developers.google.com/apps-script/guides/properties).
 
 ![Key-Value pairs in Script Properties](./assets/images/script-properties.png)
+
+Only those users that have access to your Google Sheets will be able to view these properties. Properties are never shared between scripts.
 
 ## Installation
 

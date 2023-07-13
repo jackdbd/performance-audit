@@ -6,6 +6,10 @@ declare global {
   // Apps Script server.
   const google: {
     script: {
+      // https://developers.google.com/apps-script/guides/html/reference/host
+      host: {
+        close: any
+      }
       run: {
         withFailureHandler: any
         withSuccessHandler: any
