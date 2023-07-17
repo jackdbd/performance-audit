@@ -12,7 +12,7 @@ if (import.meta.env.DEV) {
 }
 
 window.onload = (_ev) => {
-  console.log(`${PREFIX}window.load event fired`)
+  // console.log(`${PREFIX}window.load event fired`)
   render(<App />, document.getElementById('app') as HTMLElement)
 }
   

@@ -1,6 +1,7 @@
 import { assert, describe, it, beforeAll } from 'vitest'
 import { getByTestId, fireEvent } from '@testing-library/dom'
-import { DEFAULT, SELECTOR, TEST_ID } from '../src/constants'
+import { DEFAULT } from '../../shared/src/constants'
+import { SELECTOR, TEST_ID } from '../src/constants'
 import { render } from '../src/app'
 
 describe('app', () => {

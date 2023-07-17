@@ -1,9 +1,5 @@
 import { assert, describe, it } from 'vitest'
-import {
-  cookiesFromMatrix,
-  getPreviousNMonths,
-  runtestParamsFromMatrix
-} from '../src/utils'
+import { cookiesFromMatrix, runtestParamsFromMatrix } from '../src/utils'
 
 const HEADERS_COOKIES = [
   'URL',
@@ -101,22 +97,6 @@ describe('cookiesFromMatrix', () => {
       // -1 because each row in Google Sheets contains also the URL where the
       // cookie should be set
       assert.isAtMost(d.cookies.length, ROWS_COOKIES[i].length - 1)
-    })
-  })
-})
-
-describe('getPreviousNMonths', () => {
-  it('is in the yyyymm format', () => {
-    const arr = getPreviousNMonths(3)
-
-    const this_year = new Date().getFullYear()
-
-    assert.equal(arr.length, 3)
-
-    arr.forEach((yyyymm) => {
-      assert.isAtLeast(parseInt(yyyymm.slice(0, 4)), this_year)
-      assert.equal(yyyymm.length, 6)
-      assert.isTrue(yyyymm[4] === '0' || yyyymm[4] === '1')
     })
   })
 })

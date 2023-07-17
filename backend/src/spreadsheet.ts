@@ -1,5 +1,5 @@
 import { SHEET_NAME } from './constants'
-import { cookiesFromMatrix, runtestParamsFromMatrix } from './utils'
+import { cookiesFromMatrix, logJSON, runtestParamsFromMatrix } from './utils'
 
 export interface DisplayConfig {
   message: string
@@ -27,11 +27,12 @@ export const headersAndRows = (name: string) => {
 
   const headers = sheet.getRange(1, 1, 1, num_columns).getValues()[0]
   const range = sheet.getRange(2, 1, num_rows, num_columns)
+  const rows = range.getValues()
 
   const message = `Extracted headers and values from sheet '${name}'`
-  Logger.log(message)
+  logJSON({ message, headers, rows, tags: ['google-sheets'] })
 
-  return { headers, rows: range.getValues() }
+  return { headers, rows }
 }
 
 /**

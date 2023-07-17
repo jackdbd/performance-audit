@@ -214,8 +214,6 @@ describe('runtest', () => {
 
     // const res = await fetch(`https://www.webpagetest.org/runtest.php`, options)
     // const res = await fetch(`https://www.webpagetest.org/runtest.php?${qs}`)
-    // console.log('=== res.headers ===', res.headers)
-    // console.log('=== res.body ===', res.body)
     // const response = await res.text()
 
     const expected_test_id = '230620_BiDcED_9DX'

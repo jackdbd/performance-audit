@@ -62,31 +62,11 @@ export function includeHTML(filename: string) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent()
 }
 
-export const getPreviousNMonths = (n: number): string[] => {
-  const d = new Date()
-  const arr: string[] = []
-
-  for (let i = 0; i < n; i++) {
-    let month = d.getMonth() - i
-    let year = d.getFullYear()
-
-    if (month < 0) {
-      month += 12
-      year -= 1
-    }
-
-    const mm = `${month}`.padStart(2, '0')
-    arr.push(`${year}${mm}`)
-  }
-
-  return arr
-}
-
 export interface TagDict {
   [tag: string]: boolean
 }
 
-export function tagReducer(d: TagDict, tag: string) {
+function tagReducer_(d: TagDict, tag: string) {
   d[tag] = true
   return d
 }
@@ -106,7 +86,7 @@ export function logJSON<T extends LogStatement>(cfg: T) {
     message,
     severity,
     tags,
-    tag: tags.reduce(tagReducer, {}),
+    tag: tags.reduce(tagReducer_, {}),
     ...rest
   })
 }

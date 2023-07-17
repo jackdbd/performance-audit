@@ -1,5 +1,6 @@
 import './style.css'
-import { PREFIX } from '../../shared/src/constants'
+import { DEFAULT, PREFIX } from '../../shared/src/constants'
+import type { CruxHistoryAPIOptions } from '../../shared/src/interfaces'
 import { onError } from '../../shared/src/utils'
 import { SELECTOR } from './constants'
 import { render } from './app'
@@ -15,42 +16,30 @@ function onSuccess(value: Success) {
   // alert(`SUCCESS! ${JSON.stringify(value, null, 2)}`)
 }
 
-function onSubmit(ev: Event) {
-  ev.preventDefault()
+function getFormDataAndCallBackend(form: HTMLFormElement) {
+  const form_data = new FormData(form)
 
-  // a form submit is an installable trigger
-  // https://developers.google.com/apps-script/guides/triggers/events#form-submit
-  // https://developers.google.com/apps-script/reference/script/spreadsheet-trigger-builder#onFormSubmit()
-  // https://youtu.be/vYQE9ltt2Yg
-
-  // TODO: if I create an installable trigger for the form submit, there should
-  // be no need to call `google.script.run` from the frontend, and the backend
-  // would automatically receive the data from the form.
-
-  const el_crux_url = document.querySelector(
-    SELECTOR.CRUX_URL
-  ) as HTMLInputElement | null
-  if (!el_crux_url) {
-    return
+  const options: Required<CruxHistoryAPIOptions> = {
+    form_factor: DEFAULT.FORM_FACTOR,
+    url: DEFAULT.URL
   }
 
-  const el_crux_form_factor = document.querySelector(
-    SELECTOR.CRUX_FORM_FACTOR
-  ) as HTMLSelectElement | null
-  if (!el_crux_form_factor) {
-    return
-  }
-
-  const options = {
-    url: el_crux_url.value,
-    form_factor: el_crux_form_factor.value
+  for (const [name, val] of form_data.entries()) {
+    if (name === 'crux-url') {
+      options.url = val as string
+    } else if (name === 'crux-form-factor') {
+      options.form_factor = val as string
+    } else {
+      alert(`TODO: implement form field ${name}`)
+    }
   }
 
   if (import.meta.env.DEV) {
-    console.log('dev')
-    console.log('url value', el_crux_url.value)
-    console.log('form factor value', el_crux_form_factor.value)
-    // TODO: use dotenv to load the CrUX API as env variable
+    console.log(
+      `${PREFIX}skip calling CrUX History API in development`,
+      options
+    )
+    // TODO: use dotenv to load the CrUX API key as env variable
     // https://vitejs.dev/guide/env-and-mode.html
   } else {
     google.script.run
@@ -60,8 +49,23 @@ function onSubmit(ev: Event) {
   }
 }
 
+function onSubmit(ev: Event) {
+  // ev.preventDefault()
+
+  getFormDataAndCallBackend(ev.target as HTMLFormElement)
+
+  // a form submit is an installable trigger
+  // https://developers.google.com/apps-script/guides/triggers/events#form-submit
+  // https://developers.google.com/apps-script/reference/script/spreadsheet-trigger-builder#onFormSubmit()
+  // https://youtu.be/vYQE9ltt2Yg
+
+  // TODO: if I create an installable trigger for the form submit, there should
+  // be no need to call `google.script.run` from the frontend, and the backend
+  // would automatically receive the data from the form.
+}
+
 window.onload = (_ev) => {
-  console.log(`${PREFIX}window.load event fired`)
+  // console.log(`${PREFIX}window.load event fired`)
 
   const root = document.querySelector(SELECTOR.APP)
   if (!root) {

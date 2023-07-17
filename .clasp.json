@@ -1,5 +1,7 @@
 {
   "filePushOrder": [
+    "shared-constants.ts",
+    "shared-utils.ts",
     "constants.ts",
     "utils.ts",
     "spreadsheet.ts",

@@ -16,7 +16,7 @@ const processTypeScriptFile = (file_path) => {
   let s = fs.readFileSync(file_path).toString()
   s = s.replaceAll(
     /import( type)? {.*} from .*\n/g,
-    `// import stripped by ${NAME}\n`
+    `// import statement stripped by ${NAME}\n`
   )
   s = s.replaceAll(/export const/g, 'const')
   s = s.replaceAll(/export function/g, 'function')
@@ -34,6 +34,15 @@ fs.copyFileSync(
   path.join(repo_root, 'appsscript.json'),
   path.join(outdir, 'appsscript.json')
 )
+
+const shared_src = path.join(repo_root, 'shared', 'src')
+
+fs.readdirSync(shared_src).forEach((file_name) => {
+  fs.writeFileSync(
+    path.join(outdir, `shared-${file_name}`),
+    processTypeScriptFile(path.join(shared_src, file_name))
+  )
+})
 
 const backend_root = path.join(repo_root, 'backend')
 

@@ -1,16 +1,14 @@
 // https://prettier.io/docs/en/configuration.html
 const config = {
-  arrowParens: "always",
+  arrowParens: 'always',
   bracketSpacing: true,
-  endOfLine: "lf",
+  endOfLine: 'lf',
   printWidth: 80,
   semi: false,
   singleQuote: true,
   tabWidth: 2,
-  trailingComma: "none",
-  useTabs: false,
-};
+  trailingComma: 'none',
+  useTabs: false
+}
 
-// console.log('=== Prettier config [root] ===', config)
-
-module.exports = config;
+module.exports = config

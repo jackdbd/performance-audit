@@ -19,6 +19,4 @@ const config = defineConfig({
   }
 })
 
-// console.log('=== vite config ===', config)
-
 export default config

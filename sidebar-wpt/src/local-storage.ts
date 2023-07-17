@@ -20,17 +20,17 @@ export const subscribeStateToLocalStorage = () => {
       let config
       if (value_href) {
         console.log(
-          `${PREFIX} found configuration matching HREF ${u.href} in localStorage`
+          `${PREFIX}found configuration matching HREF ${u.href} in localStorage`
         )
         config = JSON.parse(value_href)
       } else if (value_origin) {
         console.log(
-          `${PREFIX} found configuration matching ORIGIN ${u.origin} in localStorage`
+          `${PREFIX}found configuration matching ORIGIN ${u.origin} in localStorage`
         )
         config = JSON.parse(value_origin)
       } else {
         console.log(
-          `${PREFIX} found no configuration for ${url} in localStorage`
+          `${PREFIX}found no configuration for ${url} in localStorage`
         )
         config = DEFAULT_CONFIG
       }

@@ -1,3 +1,4 @@
+import { PREFIX } from '../../shared/src/constants'
 import { CRUX_HISTORY_API_METRICS } from './constants'
 import { logJSON } from './utils'
 
@@ -74,7 +75,7 @@ const COLOR = {
  * Retrieves the CrUX API key from your Apps Script project settings.
  *
  * @return {string} Your CrUX API key.
- * @see {@link https://developers.google.com/apps-script/guides/properties Properties Service}
+ * @see{@link https://developers.google.com/apps-script/guides/properties Properties Service}
  * @customFunction
  */
 export const GET_CRUX_API_KEY = () => {
@@ -116,9 +117,6 @@ export const getCruxData = (config: GetCruxDataConfig) => {
   const response = UrlFetchApp.fetch(`${endpoint}?key=${api_key}`, options)
   const result = JSON.parse(response.getContentText()) as CruxHistoryApiResult
 
-  //   const status_code = response.getResponseCode()
-  //   Logger.log(`status code is ${status_code}`)
-
   logJSON({
     message: `URLFetchApp response result for URL ${config.url} (see JSON payload)`,
     severity: 'DEBUG',
@@ -129,7 +127,6 @@ export const getCruxData = (config: GetCruxDataConfig) => {
   if (result.error) {
     const text = result.error.message || 'Unknown error'
     const code = result.error.code || 'Unknown status code'
-    // Logger.log(`[${code}]: ${text}`)
     return { error: new Error(`[${code}]: ${text}`) }
   } else {
     return { value: result.record }
@@ -244,15 +241,12 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
 
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
 
-  let sheet_name = url
-    .replaceAll('https://', '')
-    .replaceAll('.', '-')
-    .replaceAll('/', '_')
+  let sheet_name = url.replaceAll('https://', '')
 
   if (form_factor) {
-    sheet_name = `${sheet_name}_${form_factor}`
+    sheet_name = `${sheet_name} ${form_factor}`
   } else {
-    sheet_name = `${sheet_name}_aggregated`
+    sheet_name = `${sheet_name} AGGREGATED`
   }
 
   let sheet = spreadsheet.getSheetByName(sheet_name)
@@ -351,19 +345,34 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
   // https://developers.google.com/apps-script/guides/sheets/functions#guidelines_for_custom_functions
   // https://stackoverflow.com/questions/29014087/apps-script-private-functions
 
-  const line_chart_cls = sheet
+  // n rows for data, 1 row for headers, 1 row to have some space before the charts
+  const START_ROW_POS = rows.length + 1 + 1
+  const START_COL_POS = 1
+  // chart height, width, gap in spreadsheet cells
+  const CHART_HEIGHT = 18
+  const CHART_WIDTH = 6
+  const CHART_GAP = 1
+
+  const bar_chart_ttfb = sheet
     .newChart()
-    .asLineChart()
+    .asBarChart()
     .addRange(sheet.getRange('A:A'))
-    .addRange(sheet.getRange('E:E'))
+    .addRange(sheet.getRange('V:V'))
+    .addRange(sheet.getRange('W:W'))
+    .addRange(sheet.getRange('X:X'))
     .setNumHeaders(1)
-    .setOption('useFirstColumnAsDomain', true)
-    .setOption('title', 'CLS')
-    .setOption('subtitle', '75th percentile')
-    .setPosition(rows.length + 2, 1, 0, 0)
+    .setPosition(START_ROW_POS, START_COL_POS, 0, 0)
+    .setOption('isStacked', 'percent')
+    .setOption('colors', [COLOR.GOOD, COLOR.NEEDS_IMPROVEMENT, COLOR.POOR])
+    // .setOption('useFirstColumnAsDomain', true)
+    .setOption('title', 'Time To First Byte')
+    .setOption(
+      'subtitle',
+      'Good: < 800ms; Needs improvement: [800ms 1800ms]; Poor: > 1800ms'
+    )
     .build()
 
-  sheet.insertChart(line_chart_cls)
+  sheet.insertChart(bar_chart_ttfb)
 
   // https://developers.google.com/apps-script/reference/spreadsheet/embedded-line-chart-builder
   const timeline_chart_ttfb = sheet
@@ -386,25 +395,10 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
     .setOption('title', 'TTFB')
     .setOption('subtitle', '75th percentile')
     // .setLegendPosition(Charts.Position.RIGHT)
-    .setPosition(rows.length + 2, 3, 0, 0)
+    .setPosition(START_ROW_POS, START_COL_POS + CHART_WIDTH + CHART_GAP, 0, 0)
     .build()
 
   sheet.insertChart(timeline_chart_ttfb)
-
-  const line_chart_fcp_vs_lcp = sheet
-    .newChart()
-    .asLineChart()
-    .addRange(sheet.getRange('A:A'))
-    .addRange(sheet.getRange('I:I'))
-    .addRange(sheet.getRange('U:U'))
-    .setNumHeaders(1)
-    .setOption('useFirstColumnAsDomain', true)
-    .setOption('title', 'FCP vs LCP')
-    .setOption('subtitle', '75th percentile')
-    .setPosition(rows.length + 2, 11, 0, 0)
-    .build()
-
-  sheet.insertChart(line_chart_fcp_vs_lcp)
 
   const bar_chart_cls = sheet
     .newChart()
@@ -414,7 +408,7 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
     .addRange(sheet.getRange('C:C'))
     .addRange(sheet.getRange('D:D'))
     .setNumHeaders(1)
-    .setPosition(rows.length + 15, 3, 0, 0)
+    .setPosition(START_ROW_POS + CHART_HEIGHT + CHART_GAP, START_COL_POS, 0, 0)
     .setOption('isStacked', 'percent')
     .setOption('colors', [COLOR.GOOD, COLOR.NEEDS_IMPROVEMENT, COLOR.POOR])
     .setOption('title', 'Cumulative Layout Shift')
@@ -426,6 +420,25 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
 
   sheet.insertChart(bar_chart_cls)
 
+  const line_chart_cls = sheet
+    .newChart()
+    .asLineChart()
+    .addRange(sheet.getRange('A:A'))
+    .addRange(sheet.getRange('E:E'))
+    .setNumHeaders(1)
+    .setOption('useFirstColumnAsDomain', true)
+    .setOption('title', 'CLS')
+    .setOption('subtitle', '75th percentile')
+    .setPosition(
+      START_ROW_POS + CHART_HEIGHT + CHART_GAP,
+      START_COL_POS + CHART_WIDTH + CHART_GAP,
+      0,
+      0
+    )
+    .build()
+
+  sheet.insertChart(line_chart_cls)
+
   const bar_chart_inp = sheet
     .newChart()
     .asBarChart()
@@ -434,7 +447,12 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
     .addRange(sheet.getRange('K:K'))
     .addRange(sheet.getRange('L:L'))
     .setNumHeaders(1)
-    .setPosition(rows.length + 10, 3, 0, 0)
+    .setPosition(
+      START_ROW_POS + CHART_HEIGHT * 2 + CHART_GAP * 2,
+      START_COL_POS,
+      0,
+      0
+    )
     .setOption('isStacked', 'percent')
     .setOption('colors', [COLOR.GOOD, COLOR.NEEDS_IMPROVEMENT, COLOR.POOR])
     // .setOption('useFirstColumnAsDomain', true)
@@ -443,26 +461,25 @@ function callCrUXHistoryAPI(config: GetCruxDataConfig) {
 
   sheet.insertChart(bar_chart_inp)
 
-  const bar_chart_ttfb = sheet
+  const line_chart_fcp_vs_lcp = sheet
     .newChart()
-    .asBarChart()
+    .asLineChart()
     .addRange(sheet.getRange('A:A'))
-    .addRange(sheet.getRange('V:V'))
-    .addRange(sheet.getRange('W:W'))
-    .addRange(sheet.getRange('X:X'))
+    .addRange(sheet.getRange('I:I'))
+    .addRange(sheet.getRange('U:U'))
     .setNumHeaders(1)
-    .setPosition(rows.length + 10, 11, 0, 0)
-    .setOption('isStacked', 'percent')
-    .setOption('colors', [COLOR.GOOD, COLOR.NEEDS_IMPROVEMENT, COLOR.POOR])
-    // .setOption('useFirstColumnAsDomain', true)
-    .setOption('title', 'Time To First Byte')
-    .setOption(
-      'subtitle',
-      'Good: < 800ms; Needs improvement: [800ms 1800ms]; Poor: > 1800ms'
+    .setOption('useFirstColumnAsDomain', true)
+    .setOption('title', 'FCP vs LCP')
+    .setOption('subtitle', '75th percentile')
+    .setPosition(
+      START_ROW_POS + CHART_HEIGHT * 2 + CHART_GAP * 2,
+      START_COL_POS + CHART_WIDTH + CHART_GAP,
+      0,
+      0
     )
     .build()
 
-  sheet.insertChart(bar_chart_ttfb)
+  sheet.insertChart(line_chart_fcp_vs_lcp)
 
   const messages = [
     `Retrieved field performance data of ${url} using the CrUX History API`,
@@ -488,10 +505,10 @@ function TEST_URL_FOUND_IN_CRUX() {
     form_factor: 'DESKTOP'
   })
   if (error) {
-    console.error(error.message)
+    console.error(`${PREFIX} error: ${error.message}`)
   }
   if (value) {
-    console.log(value)
+    console.log(`${PREFIX} value`, value)
   }
 }
 
@@ -501,9 +518,9 @@ function TEST_URL_NOT_FOUND_IN_CRUX() {
     form_factor: 'PHONE'
   })
   if (error) {
-    console.error(error.message)
+    console.error(`${PREFIX} error: ${error.message}`)
   }
   if (value) {
-    console.log(value)
+    console.log(`${PREFIX} value`, value)
   }
 }

@@ -174,7 +174,6 @@ export const runtest = ({
   } else {
     const text = result.statusText || 'Unknown error'
     const code = result.statusCode || 'Unknown status code'
-    Logger.log(`[${code}]: ${text}`)
     return { error: new Error(`[${code}]: ${text}`) }
   }
 }
@@ -226,8 +225,11 @@ export const runtests = ({
     }
   } else {
     for (const cookies of array_of_cookies) {
-      Logger.log(`set cookies for URL ${url}`)
-      Logger.log(JSON.stringify(cookies, null, 2))
+      logJSON({
+        message: `set cookies for URL ${url}`,
+        cookies,
+        tags: ['webpagetest', 'cookies']
+      })
       for (const profile of profiles) {
         batch.push({ cookies, inject_script, profile, url, wpt_script })
       }
@@ -255,8 +257,10 @@ export const runtests = ({
     for (const obj of batch) {
       // I don't know why logs inside runtest do not show up. So I log them here.
       const payload = JSON.stringify(obj, null, 2)
-      Logger.log({
-        message: `WPT runtest parameters (see payload): ${payload}`
+      logJSON({
+        message: `WPT runtest parameters (see JSON payload)`,
+        payload,
+        tags: ['webpagetest', 'parameters']
       })
       const res = runtest(obj)
 
@@ -267,9 +271,12 @@ export const runtests = ({
         error_messages.push(res.error.message)
       }
       if (res.value) {
-        Logger.log(
-          `launched WPT test for URL ${obj.url}. testId: ${res.value.testId}`
-        )
+        logJSON({
+          message: `launched WPT test for URL ${obj.url}. Test ID: ${res.value.testId}`,
+          url: obj.url,
+          test_id: res.value.testId,
+          tags: ['webpagetest', 'test-id']
+        })
         successes.push(res.value)
       }
     }

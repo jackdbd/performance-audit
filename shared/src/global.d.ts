@@ -2,6 +2,7 @@ export {}
 
 declare global {
   function alert(arg: string): void
+  const document: any
   // when running as a container-bound Apps Script project, this application has
   // access to google.script.run to call the backend functions hosted on the
   // Apps Script server.

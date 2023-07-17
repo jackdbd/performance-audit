@@ -1,48 +1,13 @@
-export const DEFAULT = {
-  ORIGIN: 'https://www.google.com'
-}
+export const FORM_NAME = 'CrUX query'
 
 export const SELECTOR = {
   APP: '#app',
-  FORM: 'form[name="CrUX query"]'
+  FORM: `form[name="${FORM_NAME}"]`,
+  INPUT_CRUX_URL: '#crux-url',
+  INPUT_MAX_BYTES_BILLED: '#maximum-bytes-billed'
 }
 
-export const CRUX_QUERY = `
-WITH cte AS (
-  SELECT
-    yyyymm,
-    \`chrome-ux-report.experimental\`.GET_COUNTRY(country_code) AS country,
-    rank,
-    desktopDensity,
-    phoneDensity,
-    tabletDensity,
-    _4GDensity,
-    _3GDensity,
-    _2GDensity,
-    slow2GDensity,
-    offlineDensity
-  FROM
-    \`chrome-ux-report.materialized.country_summary\`
-  WHERE
-    origin = @url
-  AND yyyymm IN UNNEST(@months)
-)
-SELECT
-  country,
-  ROUND(AVG(rank)) AS coarse_popularity,
-  COUNT(DISTINCT yyyymm) AS months_in_crux,
-  SAFE_MULTIPLY(ROUND(SUM(desktopDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_desktop,
-  SAFE_MULTIPLY(ROUND(SUM(phoneDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_phone,
-  SAFE_MULTIPLY(ROUND(SUM(tabletDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_tablet,
-  SAFE_MULTIPLY(ROUND(SUM(_4GDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_4G,
-  SAFE_MULTIPLY(ROUND(SUM(_3GDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_3G,
-  SAFE_MULTIPLY(ROUND(SUM(_2GDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_2G,
-  SAFE_MULTIPLY(ROUND(SUM(slow2GDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_slow2G,
-  SAFE_MULTIPLY(ROUND(SUM(offlineDensity), 2), DIV(100, COUNT(DISTINCT yyyymm))) AS percent_offline
-FROM
-  cte
-GROUP BY
-  country
-ORDER BY
-  months_in_crux DESC,
-  coarse_popularity ASC;`
+export const TEST_ID = {
+  FORM_SUBMIT_BUTTON: 'submit-button',
+  INPUT_CRUX_URL: 'crux-url'
+}

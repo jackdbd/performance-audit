@@ -1,10 +1,8 @@
-import { MENU } from './constants'
-
-export const menuItemWPTSidebar = () => {
+export const menuItemWebPageTest = () => {
   const html_output = HtmlService.createHtmlOutputFromFile(
     'sidebar-wpt/index.html'
   )
-    .setTitle(MENU.ITEM_ONE_CAPTION)
+    .setTitle('WebPageTest')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
 
   // Apps Script uses iframes to sandbox custom user interfaces (like this sidebar) for Google Docs, Sheets, and Forms.
@@ -28,24 +26,37 @@ export const menuItemCrUXDialog = () => {
   )
 }
 
-export const menuItemCrUXHistoryAPIDialog = () => {
+export const menuItemDeviceAndConnectivityByCountry = () => {
+  const html_output = HtmlService.createHtmlOutputFromFile(
+    'dialog-crux-query/index.html'
+  )
+    .setWidth(800)
+    .setHeight(600)
+
+  SpreadsheetApp.getUi().showModalDialog(
+    html_output,
+    'Device and connectivity by country'
+  )
+}
+
+export const menuItemFieldPerformance = () => {
   const html_output = HtmlService.createHtmlOutputFromFile(
     'dialog-crux-history/index.html'
   )
     .setWidth(600)
     .setHeight(400)
 
-  SpreadsheetApp.getUi().showModalDialog(
-    html_output,
-    'Query the CrUX History API'
-  )
+  SpreadsheetApp.getUi().showModalDialog(html_output, 'Field performance')
 }
 
 export const addCustomMenuToUi = () => {
   SpreadsheetApp.getUi()
-    .createMenu(MENU.TITLE)
-    .addItem(MENU.ITEM_ONE_CAPTION, 'menuItemWPTSidebar')
-    .addItem(MENU.ITEM_TWO_CAPTION, 'menuItemCrUXDialog')
-    .addItem(MENU.ITEM_THREE_CAPTION, 'menuItemCrUXHistoryAPIDialog')
+    .createMenu('Performance Audit')
+    .addItem(
+      'Device and connectivity by country',
+      'menuItemDeviceAndConnectivityByCountry'
+    )
+    .addItem('Field performance', 'menuItemFieldPerformance')
+    .addItem('WebPageTest', 'menuItemWebPageTest')
     .addToUi()
 }

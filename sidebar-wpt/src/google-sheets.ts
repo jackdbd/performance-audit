@@ -1,7 +1,8 @@
 import type { SpreadsheetData } from '../../shared/src/interfaces'
 import { PREFIX, SHEET_NAME } from '../../shared/src/constants'
+import { onError } from '../../shared/src/utils'
 import { url_signal, wpt_profiles_signal } from './state'
-import { FAKE_WPT_PARAMS_HEADERS, fakeWptParamsRows, onError } from './utils'
+import { FAKE_WPT_PARAMS_HEADERS, fakeWptParamsRows } from './utils'
 import type { Param } from './webpagetest'
 
 export const subscribeStateToGoogleSheetsDev = () => {

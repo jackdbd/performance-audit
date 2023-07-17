@@ -1,10 +1,28 @@
 import { PREFIX } from './constants'
 
+/**
+ * Renders an error message in the DOM, in the currently open dialog or sidebar.
+ *
+ * @see{@link https://developers.google.com/apps-script/guides/html/reference/host Class google.script.run}
+ */
 export const onError = (error: any) => {
-  const message = error.message || 'got an error with no message'
-  console.error(`${PREFIX} error`, error)
-  alert(`ERROR: ${message}`)
-  google.script.host.close()
+  const summary = error.message || 'got an error with no message'
+
+  // alert(`ERROR: ${message}`)
+  // google.script.host.close()
+
+  const root = document.querySelector('#app')
+  if (!root) {
+    alert(`Selector #app found nothing on this page`)
+    return
+  }
+
+  root.innerHTML = `
+  <div class="error">
+    <h3>Error from Apps Script server</h3>
+    <p><code>${summary}</code></p>
+  </div>
+`
 }
 
 export const useState = (initial_state = {}) => {

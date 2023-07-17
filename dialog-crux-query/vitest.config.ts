@@ -15,6 +15,4 @@ const config = defineConfig({
   }
 })
 
-// console.log(`=== vitest config ===`, config)
-
 export default config

@@ -1,5 +1,6 @@
-import type { RunTestsResult } from '../../shared/src/interfaces'
 import { PREFIX } from '../../shared/src/constants'
+import type { RunTestsResult } from '../../shared/src/interfaces'
+import { onError } from '../../shared/src/utils'
 import { DEFAULT_CONFIG, SELECTOR } from './constants'
 import {
   url_signal,
@@ -7,7 +8,7 @@ import {
   script_lines_signal,
   wpt_profiles_signal
 } from './state'
-import { onError, resetDataset } from './utils'
+import { resetDataset } from './utils'
 
 export const onBlur = (_ev: Event) => {
   const input = document.querySelector(
@@ -48,20 +49,20 @@ export const onBlur = (_ev: Event) => {
   let config
   if (value_href) {
     console.log(
-      `${PREFIX} found configuration matching HREF ${u.href} in localStorage`
+      `${PREFIX}found configuration matching HREF ${u.href} in localStorage`
     )
     config = JSON.parse(value_href)
   } else if (value_origin) {
     console.log(
-      `${PREFIX} found configuration matching ORIGIN ${u.origin} in localStorage`
+      `${PREFIX}found configuration matching ORIGIN ${u.origin} in localStorage`
     )
     config = JSON.parse(value_origin)
   } else {
-    console.log(`${PREFIX} found no configuration for ${url} in localStorage`)
+    console.log(`${PREFIX}found no configuration for ${url} in localStorage`)
     config = DEFAULT_CONFIG
   }
 
-  console.log(`${PREFIX} configuration`)
+  console.log(`${PREFIX}configuration`)
   console.table(config)
   console.groupEnd()
 

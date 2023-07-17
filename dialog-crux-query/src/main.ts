@@ -1,11 +1,49 @@
 import './style.css'
-import { PREFIX } from '../../shared/src/constants'
+import { DEFAULT, PREFIX } from '../../shared/src/constants'
+import type { CruxBigQueryOptions } from '../../shared/src/interfaces'
 import { onError } from '../../shared/src/utils'
 import { SELECTOR } from './constants'
 import { render } from './app'
 
 interface Success {
   message: string
+}
+
+function getFormDataAndCallBackend(form: HTMLFormElement) {
+  const form_data = new FormData(form)
+
+  const options: Required<CruxBigQueryOptions> = {
+    maximum_bytes_billed: DEFAULT.MAXIMUM_BYTES_BILLED,
+    months: [],
+    query_timeout_ms: DEFAULT.QUERY_TIMEOUT_MS,
+    url: DEFAULT.URL
+  }
+
+  for (const [name, val] of form_data.entries()) {
+    if (name.startsWith('month')) {
+      options.months.push(parseInt(val as string, 10))
+    } else if (name === 'crux-url') {
+      options.url = val as string
+    } else if (name === 'maximum-bytes-billed') {
+      options.maximum_bytes_billed = parseInt(val as string, 10)
+    } else if (name === 'timeout-ms') {
+      options.query_timeout_ms = parseInt(val as string, 10)
+    } else {
+      alert(`TODO: implement form field ${name}`)
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    console.log(
+      `${PREFIX}skip querying CrUX BigQuery dataset in development`,
+      options
+    )
+  } else {
+    google.script.run
+      .withFailureHandler(onError)
+      .withSuccessHandler(onSuccess)
+      .runQueryOnCrux(options)
+  }
 }
 
 function onSuccess(value: Success) {
@@ -19,6 +57,8 @@ function onSubmit(ev: Event) {
   // alert(`TODO: implement form submit`)
   ev.preventDefault()
 
+  getFormDataAndCallBackend(ev.target as HTMLFormElement)
+
   // a form submit is an installable trigger
   // https://developers.google.com/apps-script/guides/triggers/events#form-submit
   // https://developers.google.com/apps-script/reference/script/spreadsheet-trigger-builder#onFormSubmit()
@@ -27,19 +67,10 @@ function onSubmit(ev: Event) {
   // TODO: if I create an installable trigger for the form submit, there should
   // be no need to call `google.script.run` from the frontend, and the backend
   // would automatically receive the data from the form.
-  const options = {
-    url: 'https://www.vino.com',
-    maximum_bytes_billed: 15_000_000_000
-  }
-
-  google.script.run
-    .withFailureHandler(onError)
-    .withSuccessHandler(onSuccess)
-    .runQueryOnCrux(options)
 }
 
 window.onload = (_ev) => {
-  console.log(`${PREFIX}window.load event fired`)
+  // console.log(`${PREFIX}window.load event fired`)
 
   const root = document.querySelector(SELECTOR.APP)
   if (!root) {
