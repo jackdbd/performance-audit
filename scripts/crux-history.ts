@@ -12,7 +12,9 @@ interface Argv {
 
 const main = async () => {
   const argv = yargs(process.argv.slice(2))
-    .usage('./$0 - Search field performance data using the CrUX history API')
+    .usage(
+      'Usage:\nnpx tsm scripts/$0 - Search field performance data using the CrUX history API'
+    )
     .option('url', {
       alias: 'u',
       describe: 'URL or origin to search in CrUX',
@@ -24,12 +26,12 @@ const main = async () => {
       choices: ['PHONE', 'DESKTOP', 'TABLET']
     })
     .example(
-      'node scripts/crux.mjs --url https://www.vino.com/ --form-factor DESKTOP',
+      'npx tsm scripts/$0 --url https://www.vino.com/ --form-factor DESKTOP',
       'Retrieve field performance data of the entire origin of vino.com, for DESKTOP devices'
     )
     .example(
-      'node scripts/crux.mjs --url https://www.vino.com/vino/rosso --form-factor DESKTOP',
-      'Retrieve field performance data of a specific URL of vino.com, for DESKTOP devices'
+      'npx tsm scripts/$0 -u https://www.vino.com/vino/rosso -f PHONE',
+      'Retrieve field performance data of a specific URL of vino.com, for PHONE devices'
     )
     .help('help').argv as Argv
 

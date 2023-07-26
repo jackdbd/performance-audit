@@ -39,7 +39,7 @@ jobs:
         env:
           NODE_ENV: test
           WEBPAGETEST_API_KEY: ${{ secrets.WEBPAGETEST_API_KEY }}
-        run: npm run test:coverage
+        run: npm run coverage
 
       - name: 🛠️ Build
         run: npm run build

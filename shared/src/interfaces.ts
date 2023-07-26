@@ -23,3 +23,11 @@ export interface CruxHistoryAPIOptions {
   form_factor?: string
   url?: string
 }
+
+export interface CruxBigQueryPoorTTFBOptions {
+  country_code?: string
+  maximum_bytes_billed?: number
+  form_factor?: string
+  query_timeout_ms?: number
+  yyyymm?: number
+}

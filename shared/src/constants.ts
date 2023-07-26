@@ -48,9 +48,47 @@ ORDER BY
   months_in_crux DESC,
   coarse_popularity ASC;`
 
+export const CRUX_QUERY_POOR_TTFB = `
+WITH cte AS (
+  SELECT
+    origin,
+    country_code,
+    rank AS coarse_popularity,
+    device,
+
+    ROUND(SAFE_MULTIPLY(desktopDensity, 100), 2) AS percent_desktop,
+    ROUND(SAFE_MULTIPLY(tabletDensity, 100), 2) AS percent_tablet,
+    ROUND(SAFE_MULTIPLY(phoneDensity, 100), 2) AS percent_phone,
+
+    ROUND(SAFE_MULTIPLY(slow_ttfb, 100), 2) AS ttfb_poor,
+    ROUND(SAFE_MULTIPLY(avg_ttfb, 100), 2) AS ttfb_needs_improvement,
+    ROUND(SAFE_MULTIPLY(fast_ttfb, 100), 2) AS ttfb_good,
+    p75_ttfb AS ttfb_ms_p75
+  FROM
+    \`chrome-ux-report.materialized.country_summary\`
+  WHERE
+    UPPER(country_code) = @country_code
+    AND device = @form_factor
+    AND yyyymm = @yyyymm
+    AND rank <= 1000
+    AND slow_ttfb > 0.20
+)
+SELECT
+  origin,
+  ttfb_poor,
+  ttfb_needs_improvement,
+  ttfb_good,
+  ttfb_ms_p75
+FROM
+  cte
+ORDER BY
+  ttfb_poor DESC;`
+
 export const DEFAULT = {
+  COUNTRY_CODE: 'IT',
   FORM_FACTOR: 'PHONE',
   MAXIMUM_BYTES_BILLED: 15_000_000_000,
   QUERY_TIMEOUT_MS: 5000,
-  URL: 'https://www.google.com'
+  URL: 'https://www.google.com',
+  YYYYMM: 202306
 }

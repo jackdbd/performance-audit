@@ -120,6 +120,10 @@ If you want to inspect the Apps Script project bound to your Google Sheets file,
 npx clasp open
 ```
 
+## Scripts
+
+See [scripts](./scripts/README.md).
+
 ## Reference
 
 - Apps Script Manifest (i.e. `appsscript.json`): see [here](https://developers.google.com/apps-script/concepts/manifests) and [here](https://developers.google.com/apps-script/manifest).

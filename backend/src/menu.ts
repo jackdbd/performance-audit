@@ -13,17 +13,14 @@ export const menuItemWebPageTest = () => {
   SpreadsheetApp.getUi().showSidebar(html_output)
 }
 
-export const menuItemCrUXDialog = () => {
+export const menuItemOriginsWithPoorTTFB = () => {
   const html_output = HtmlService.createHtmlOutputFromFile(
-    'dialog-crux-query/index.html'
+    'dialog-origins-with-poor-ttfb/index.html'
   )
     .setWidth(800)
     .setHeight(600)
 
-  SpreadsheetApp.getUi().showModalDialog(
-    html_output,
-    'Query the BigQuery CrUX dataset'
-  )
+  SpreadsheetApp.getUi().showModalDialog(html_output, 'Origins with poor TTFB')
 }
 
 export const menuItemDeviceAndConnectivityByCountry = () => {
@@ -52,6 +49,7 @@ export const menuItemFieldPerformance = () => {
 export const addCustomMenuToUi = () => {
   SpreadsheetApp.getUi()
     .createMenu('Performance Audit')
+    .addItem('Origins with poor TTFB', 'menuItemOriginsWithPoorTTFB')
     .addItem(
       'Device and connectivity by country',
       'menuItemDeviceAndConnectivityByCountry'

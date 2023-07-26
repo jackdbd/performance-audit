@@ -3,13 +3,13 @@ import {
   DEFAULT
 } from '../../shared/src/constants'
 import { getPreviousNMonths } from '../../shared/src/utils'
-import { TEST_ID } from './constants'
+import { FORM_NAME, TEST_ID } from './constants'
 
 export const render = () => {
   return `
   <div>
     <p>Query the <a href="https://developer.chrome.com/docs/crux/bigquery/">CrUX BigQuery dataset</a> to discover device and connectivity, grouped by country.</p>
-    <form class="" name="CrUX query" method="POST" action="">
+    <form class="" name="${FORM_NAME}" method="POST" action="">
       <fieldset>
         <legend>Query parameters</legend>
         <p>Parameters for the <a href="https://cloud.google.com/bigquery/docs/parameterized-queries">BigQuery parameterized query</a>.</p>
